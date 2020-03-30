@@ -8,10 +8,22 @@ function insert(params){
   conn.query(sql_insert, params, function(err, res){
     if(err){
       console.log('[INSERT ERROR] - ',err.message);
-      return;
+      return false;
      }
      console.log("插入成功~")
      return true;
+  })
+}
+
+function deleteByPrimaryKey(params){
+  var sql_delete = "delete from user_healthdata where id = ?"
+  conn.query(sql_delete, params, function(err, res){
+    if(err){
+      console.log('[INSERT ERROR] - ',err.message);
+      return false;
+    }
+    console.log("删除成功");
+    return true;
   })
 }
 
@@ -21,7 +33,7 @@ function findLatestData(params){
   conn.query(sql_insert, params, function(err, res){
     if(err){
       console.log('[INSERT ERROR] - ',err.message);
-      return;
+      return false;
      }
      console.log("查找成功~")
      return res;
@@ -31,25 +43,25 @@ function findLatestData(params){
 // 参数列表[userid, userType, uploadTime, eval, permitVisit]
 function findByConditions(params){
   var sql_select = "insert into user_healthdata where 1 = 1"
-  if(userid != "" || userid != null)
+  if(params[0] != "" && params[0] != null)
     sql_select += "and userid = ?"
 
-  if(userType != "" || userType != null)
+  if(params[1] != "" && params[1] != null)
     sql_select += "or userType = ?"
 
-  if(uploadTime != "" || uploadTime != null)
+  if(params[2] != "" && params[2] != null)
     sql_select += "or uploadTime = ?"
 
-  if(eval != "" || eval != null)
+  if(params[3] != "" && params[3] != null)
     sql_select += "or eval = ?"
 
-  if(permitVisit != "" || permitVisit != null)
+  if(params[4] != "" && params[4] != null)
     sql_select += "or permitVisit = ?"
 
   conn.query(sql_select, params, function(err, res){
     if(err){
       console.log('[INSERT ERROR] - ',err.message);
-      return;
+      return false;
       }
       console.log("查找成功~")
       return res;

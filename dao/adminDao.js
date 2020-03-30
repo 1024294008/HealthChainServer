@@ -7,7 +7,7 @@ function insert(params){
   conn.query(sql_insert, params, function(err, res){
     if(err){
       console.log('[INSERT ERROR] - ',err.message);
-      return;
+      return false;
      }
      console.log("插入成功~")
      return true;
@@ -19,7 +19,7 @@ function deleteByPrimaryKey(params){
   conn.query(sql_delete, params, function(err, res){
     if(err){
       console.log('[INSERT ERROR] - ',err.message);
-      return;
+      return false;
      }
      console.log("删除成功~")
      return true;
@@ -31,7 +31,7 @@ function updateByPrimaryKey(params){
   conn.query(sql_update, params, function(err, res){
     if(err){
       console.log('[INSERT ERROR] - ',err.message);
-      return;
+      return false;
     }
     console.log("修改成功~")
     return true;
@@ -45,7 +45,7 @@ function findByPrimaryKey(params){
 
     if(err){
       console.log('[INSERT ERROR] - ',err.message);
-      return;
+      return false;
      }
     console.log("查找成功")
     return res;
@@ -58,7 +58,7 @@ function findByAccount(params){
   conn.query(sql_select, params, function(err, res){
     if(err){
       console.log('[INSERT ERROR] - ',err.message);
-      return;
+      return false;
      }
      console.log("查找成功")
     return res;
@@ -68,13 +68,13 @@ function findByAccount(params){
 // 参数列表[authority]
 function findByConditions(params){
   var sql_select = "select * from admin where 1 = 1"
-  if(params != "")
+  if(params[0] != "" && params[0] != null)
     sql_select += "and authority = ?"
   conn.query(sql_select, params,function(err, res){
 
     if(err){
       console.log('[INSERT ERROR] - ',err.message);
-      return;
+      return false;
      }
     console.log("查找成功~")
     return res;
