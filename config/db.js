@@ -3,7 +3,7 @@ var mysql_config = {
   port: 3306,
   user: "root",
   password: "123456",
-  database: "blockchain"
+  database: "healthchain"
 };
 
 module.exports = mysql_config;

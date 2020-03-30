@@ -3,8 +3,19 @@ var createToken = require('../../middleware/createToken')
 var checkToken = require('../../middleware/checkToken')
 var router = express.Router()
 
-router.post('/', function(req, res, next){
+var adminDao = require('../../dao/adminDao')
 
+router.get('/', function(req, res, next){
+  // 获取get数据  req.query
+  // 获取post数据 req.body
+  // 返回json数据 res.json({"account": ""})
+  // var token = createToken({"id": 2, "type": "admin"}) // 根据指定数据创建token
+  adminDao.findByConditions()
 })
+
+// 解析token
+// router.post('/aa', checkToken, function(req, res, next){
+//   admin = req.body.verify
+// })
 
 module.exports = router
