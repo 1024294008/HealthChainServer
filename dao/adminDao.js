@@ -2,16 +2,15 @@ var db = require("../db/mysql")
 
 var conn = db.connect()
 
-function insert(){
-
+function insert(params){
   var sql_insert = "insert into admin(account,password,ethAddress,authority) values(?,?,?,?)"
-  var params = ["789", "123", "567", "567"]
   conn.query(sql_insert, params, function(err, res){
     if(err){
       console.log('[INSERT ERROR] - ',err.message);
       return;
      }
-     console.log(res)
+     console.log("插入成功~")
+     return true;
   })
 }
 
@@ -22,6 +21,8 @@ function deleteByPrimaryKey(params){
       console.log('[INSERT ERROR] - ',err.message);
       return;
      }
+     console.log("删除成功~")
+     return true;
   })
 }
 
@@ -32,8 +33,10 @@ function updateByPrimaryKey(params){
       console.log('[INSERT ERROR] - ',err.message);
       return;
     }
-    console.log(res)
+    console.log("修改成功~")
+    return true;
   })
+
 }
 
 function findByPrimaryKey(params){
@@ -44,37 +47,37 @@ function findByPrimaryKey(params){
       console.log('[INSERT ERROR] - ',err.message);
       return;
      }
-    console.log(res)
+    console.log("查找成功")
+    return res;
   })
 }
 
+
 function findByAccount(params){
   var sql_select = "select * from admin where account = ?"
-
   conn.query(sql_select, params, function(err, res){
     if(err){
       console.log('[INSERT ERROR] - ',err.message);
       return;
      }
-    console.log(res)
-
+     console.log("查找成功")
+    return res;
   })
 }
 
-function findByConditions(){
+// 参数列表[authority]
+function findByConditions(params){
   var sql_select = "select * from admin where 1 = 1"
-  var params = ""
+  if(params != "")
+    sql_select += "and authority = ?"
   conn.query(sql_select, params,function(err, res){
 
     if(err){
       console.log('[INSERT ERROR] - ',err.message);
       return;
      }
-    // console.log(res[0].RowDataPacket)
-    // console.log(res)
-    for(var i =0; i<3; i++){
-      console.log(res[i])
-    }
+    console.log("查找成功~")
+    return res;
   })
 
 }
