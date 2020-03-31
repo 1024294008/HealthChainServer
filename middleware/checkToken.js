@@ -13,8 +13,9 @@ module.exports = function(req, res, next){
     return
   }else{
     res.json({
-      code: 401,
-      msg: '未授权'
+      _code: '401',
+      _msg: '未授权',
+      _data: {}
     })
   }
 }

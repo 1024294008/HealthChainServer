@@ -3,7 +3,7 @@ var db = require("../db/mysql")
 var conn = db.connect()
 
 function insert(params, callback){
-  var sql_insert = 'insert into user set ?'
+  var sql_insert = 'insert into medicalservice set ?'
   conn.query(sql_insert, params, function(err, result){
     if(err){
       console.log('[INSERT ERROR] - ',err.message);
@@ -15,7 +15,7 @@ function insert(params, callback){
   })
 }
 function deleteByPrimaryKey(params, callback){
-  var sql_delete = "delete from user where id = ?"
+  var sql_delete = "delete from medicalservice where id = ?"
   conn.query(sql_delete, params, function(err, result){
     if(err){
       console.log('[DELETE ERROR] - ',err.message);
@@ -28,7 +28,7 @@ function deleteByPrimaryKey(params, callback){
 }
 
 function updateByPrimaryKey(params, callback){
-  var sql_update = "update user set ? where id = ?"
+  var sql_update = "update medicalservice set ? where id = ?"
   conn.query(sql_update, params, function(err, result){
     if(err){
       console.log('[UPDATE ERROR] - ',err.message);
@@ -41,7 +41,7 @@ function updateByPrimaryKey(params, callback){
 }
 
 function findByPrimaryKey(params, callback){
-  var sql_select = "select * from user where id = ?"
+  var sql_select = "select * from medicalservice where id = ?"
   conn.query(sql_select, params, function(err, result){
     if(err){
       console.log('[FIND ERROR] - ',err.message);
@@ -54,7 +54,7 @@ function findByPrimaryKey(params, callback){
 }
 
 function findByAccount(params, callback){
-  var sql_select = "select * from user where account = ?"
+  var sql_select = "select * from medicalservice where account = ?"
   conn.query(sql_select, params, function(err, result){
     if(err){
       console.log('[FIND ERROR] - ',err.message);

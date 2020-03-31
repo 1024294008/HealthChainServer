@@ -1,3 +1,5 @@
+/* dao入口文件 */
+
 var adminDao = require('./adminDao')
 var logDao = require('./logDao')
 var user_healthdataDao = require('./user_healthdataDao')
