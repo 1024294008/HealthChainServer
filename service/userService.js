@@ -74,9 +74,7 @@ function register(req, callback){
 
 // 获取用户信息
 function getUserInfo(req, callback){
-  console.log(req.body.verify)
-
-  if(req.body.verify && req.body.verify.id){
+  if(req.body && req.body.verify && req.body.verify.id){
     dao.userDao.findByPrimaryKey(req.body.verify.id, function(status, result){
       if(1 === status && result[0]){
         obj._code = '200'
@@ -101,17 +99,81 @@ function getUserInfo(req, callback){
 
 // 更新用户信息
 function updateUserInfo(req, callback){
-
+  if(req.body && req.body.verify && req.body.verify.id){
+    var id = req.body.verify.id
+    delete req.body.token
+    delete req.body.verify
+    dao.userDao.findByPrimaryKey(id, function(status, result){
+      if(1 === status && result[0]){
+        dao.userDao.updateByPrimaryKey([req.body, id], function(status){
+          obj._code = '200'
+          obj._msg = '更新成功'
+          obj._data = {}
+          callback(obj)
+        })
+      } else {
+        obj._code = '201'
+        obj._msg = '更新失败'
+        obj._data = {}
+        callback(obj)
+      }
+    })
+  } else {
+    obj._code = '201'
+    obj._msg = '更新失败'
+    obj._data = {}
+    callback(obj)
+  }
 }
 
 // 获取医疗服务列表
-function getMedicalServiceList(){
-
+function getMedicalServiceList(req, callback){
+  dao.medicalServiceDao.findAllAudited(function(status, result){
+    if(1 === status){
+      obj._code = '200'
+      obj._msg = '查询成功'
+      obj._data = {
+        medicalServiceList: {
+          data: result
+        }
+      }
+      callback(obj)
+    }
+    else {
+      obj._code = '201'
+      obj._msg = '查询失败'
+      obj._data = {}
+      callback(obj)
+    }
+  })
 }
 
 // 获取历史信息
-function getHealthDataHealth(){
-
+function getHealthData(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id && req.body.latest){
+    if(1 === req.body.latest){
+      // 查询最近一条数据
+      dao.user_healthdataDao.findLatestData({userid: req.body.verify.id}, function(status, result){
+        if(1 === status && result[0]){
+          // 通过得到的地址获取数据
+          callback()
+        } else {
+          obj._code = '201'
+          obj._msg = '查询失败'
+          obj._data = {}
+          callback(obj)
+        }
+      })
+    } else {
+      // 查询全部数据
+      // dao.user_healthdataDao.findByConditions()
+    }
+  } else {
+    obj._code = '201'
+    obj._msg = '查询失败'
+    obj._data = {}
+    callback(obj)
+  }
 }
 
 module.exports = {
@@ -120,5 +182,5 @@ module.exports = {
   getUserInfo,
   updateUserInfo,
   getMedicalServiceList,
-  getHealthDataHealth
+  getHealthData
 }
