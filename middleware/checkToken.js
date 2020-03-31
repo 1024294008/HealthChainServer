@@ -8,7 +8,7 @@ module.exports = function(req, res, next){
   var token = req.body.token
   if(token){
     var verify = jwt.verify(token, tokenSecret)
-    req.body.verify = verify
+    req.body.verify = verify.name
     next()
     return
   }else{
