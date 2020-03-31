@@ -2,84 +2,116 @@ var db = require("../db/mysql")
 
 var conn = db.connect()
 
-function insert(params){
-  var sql_insert = "insert into admin(account,password,ethAddress,authority) values(?,?,?,?)"
-  conn.query(sql_insert, params, function(err, res){
+// {用户信息json}
+function insert(params, callback){
+  var sql_insert = "insert into admin set ?"
+  conn.query(sql_insert, params, function(err, res){ // 异步调用，不能直接返回
     if(err){
       console.log('[INSERT ERROR] - ',err.message);
+      callback(0);  // 调用回调之后才可以返回
       return;
      }
      console.log("插入成功~")
-     return true;
+     callback(1);
   })
 }
 
-function deleteByPrimaryKey(params){
-  var sql_delete = "delete from damin where id = ?"
-  conn.query(sql_delete, params, function(err, res){
+// 参数 {"id": 1}
+function deleteByPrimaryKey(params, callback){
+  var sql_delete = "delete from admin where id = ?"
+  conn.query(sql_delete, params.id, function(err, res){
     if(err){
-      console.log('[INSERT ERROR] - ',err.message);
+      console.log('[DELETE ERROR] - ',err.message);
+      callback(0);
       return;
      }
-     console.log("删除成功~")
-     return true;
+     console.log("删除成功~");
+     callback(1);
   })
 }
 
-function updateByPrimaryKey(params){
-  var sql_update = "update admin set password = ? where id = id"
+// [{用户信息json}, id]
+function updateByPrimaryKey(params, callback){
+  var sql_update = "update admin set ? where id = id"
   conn.query(sql_update, params, function(err, res){
     if(err){
-      console.log('[INSERT ERROR] - ',err.message);
+      console.log('[UPDATE ERROR] - ',err.message);
+      callback(0);
       return;
     }
-    console.log("修改成功~")
-    return true;
+    console.log("修改成功~");
+    callback(1);
   })
-
 }
 
-function findByPrimaryKey(params){
+// 参数 {"id": 1}
+function findByPrimaryKey(params, callback){
   var sql_select = "select * from admin where id = ?"
-  conn.query(sql_select, params, function(err, res){
-
+  conn.query(sql_select, params.id, function(err, res){
     if(err){
-      console.log('[INSERT ERROR] - ',err.message);
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0);
       return;
      }
-    console.log("查找成功")
-    return res;
+    console.log("查找成功");
+    callback(1, res);
   })
 }
 
-
-function findByAccount(params){
+// 参数{"account": "1231"}
+function findByAccount(params, callback){
   var sql_select = "select * from admin where account = ?"
   conn.query(sql_select, params, function(err, res){
     if(err){
-      console.log('[INSERT ERROR] - ',err.message);
-      return;
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0);
+      return false;
      }
-     console.log("查找成功")
+     console.log("查找成功");
+     callback(1, res);
     return res;
   })
 }
 
-// 参数列表[authority]
-function findByConditions(params){
-  var sql_select = "select * from admin where 1 = 1"
-  if(params != "")
-    sql_select += "and authority = ?"
-  conn.query(sql_select, params,function(err, res){
+// 参数列表{"authority": "root", "limit": 1, "page": 2}
+function findByConditionsCount(params, callback){
+  var sql_select_count = 'select count(*) from admin where 1 = 1 '  // 注意末尾空格
 
+  if(params.authority != "" && params.authority != null)
+    sql_select_count += 'and authority = ' + '\"'  + params.authority + '\" ' // 字符串拼接需要引号，注意末尾空格
+
+  console.log(sql_select_count)
+
+  conn.query(sql_select_count, "",function(err, res){
     if(err){
-      console.log('[INSERT ERROR] - ',err.message);
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0);
       return;
      }
-    console.log("查找成功~")
-    return res;
+    console.log("条数查找成功~");
+    callback(1, res);
   })
+}
 
+// 参数列表{"authority": "root", "limit": 1, "page": 2}
+function findByConditions(params, callback){
+  var sql_select = 'select * from admin where 1 = 1 ' // 注意末尾空格
+
+  if(params.authority != "" && params.authority != null)
+    sql_select += 'and authority = ' + '\"'  + params.authority + '\" ' // 字符串拼接需要引号，注意末尾空格
+
+  sql_select += 'limit ?, ?';
+
+  conn.query(sql_select, [params.limit*(params.page-1), params.limit],function(err, res){
+
+    if(err){
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0);
+      return;
+     }
+    console.log("查找成功~");
+    callback(1, res);
+  })
 }
 
 module.exports = {
@@ -88,5 +120,6 @@ module.exports = {
   updateByPrimaryKey,
   findByPrimaryKey,
   findByAccount,
+  findByConditionsCount,
   findByConditions,
 }
