@@ -10,7 +10,25 @@ router.get('/', function(req, res, next){
   // 获取post数据 req.body
   // 返回json数据 res.json({"account": ""})
   // var token = createToken({"id": 2, "type": "admin"}) // 根据指定数据创建token
-  adminDao.findByConditions()
+
+  var params = {
+    "authority": "root",
+    "limit": 2,
+    "page": 1
+  }
+
+  // adminDao.findByConditionsCount(params, function(status, result){
+  //   res.json(result)
+  // })
+
+  // adminDao.findByConditions(params, function(status, result){
+  //   res.json(result)
+  // })
+
+  // adminDao.deleteByPrimaryKey({"id": 8}, function(status, result){
+  //   res.json(result);
+  // })
+
 })
 
 // 解析token
