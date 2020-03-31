@@ -11,5 +11,5 @@ module.exports = function(app){
   app.use('/api/admin/login', require('./admin/login'))
 
   /* common路由 */
-
+  app.use('/api/common/getOrgInfo', require('./common/getOrgInfo'))
 }
