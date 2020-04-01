@@ -16,7 +16,7 @@ function insert(params, callback){
 
 function findCountByUserid(params, callback){
   console.log("Dao")
-  var sql_select = "select count(*) from visitorrecord where userid = ?"
+  var sql_select = "select count(*) as allCount from visitorrecord where userid = ?"
   conn.query(sql_select, params, function(err, result){
     if(err){
       console.log('[SELECT COUNT ERROR] - ',err.message);
@@ -29,9 +29,8 @@ function findCountByUserid(params, callback){
 }
 
 function findAllRecordsByUserid(params, callback){
-  //page limit
-  var sql_select = "select * from visitorrecord where userid = ? limit ?,? "
-  conn.query(sql_select, [params.userid, params.limit*(params.page-1), params.limit], function(err, result){
+  var sql_select = "select * from visitorrecord where userid = ? "
+  conn.query(sql_select, params.userid, function(err, result){
     if(err){
       console.log('[SELECT ALL RECORD ERROR] - ',err.message);
       callback(0)
