@@ -67,6 +67,8 @@ function findByConditions(params, callback){
   sql_select += 'limit ' + params.limit*(params.page-1) + ',' + params.limit
   // sql_select += 'limit ?, ?';
 
+  console.log(sql_select)
+
   conn.query(sql_select, "", function(err, res){
     if(err){
       console.log('[FIND ERROR] - ',err.message);

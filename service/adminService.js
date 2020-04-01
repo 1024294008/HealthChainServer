@@ -396,20 +396,20 @@ function getLogList(req, callback){
       page: req.body.page
     }
 
-    dao.medicalServiceDao.findByConditionsCount(params, function(status, result){
+    dao.logDao.findByConditionsCount(params, function(status, result){
       if( 1 === status && result[0]){
         objList._code = "200";
         objList._msg = "查找成功";
         objList._data.dataList.count = result[0];
-
-        dao.medicalServiceDao.findByConditions(params, function(st, re){
+        dao.logDao.findByConditions(params, function(st, re){
           if( 1 === st && re[0]){
             objList._data.dataList.data = re;
             callback(objList);
           }
           else{
+            console.log(re)
             obj._code = "201";
-            obj._msg = "查找失败..";
+            obj._msg = "查找失败....";
             obj._data = {};
             callback(obj);
           }
@@ -436,16 +436,16 @@ function getLogList(req, callback){
 function getUserList(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     var params = {
-      limit: req.limit,
-      page: req.page
+      limit: req.body.limit,
+      page: req.body.page
     }
-    dao.adminDao.findByConditionsCount(params, function(status, result){
+    dao.userDao.findByConditionsCount(params, function(status, result){
       if( 1=== status && result[0]){
         objList._code = "200";
         objList._msg = "查找成功";
         objList._data.dataList.count = result[0];
 
-        dao.adminDao.findByConditions(params, function(st, re){
+        dao.userDao.findByConditions(params, function(st, re){
           if( 1=== st && re[0]){
             objList._data.dataList.data = re;
             callback(objList);
@@ -478,12 +478,12 @@ function getUserList(req, callback){
 
 // 查看用户信息
 function findUserInfo(req, callback){
-  if( req.query && req.body.verify && req.body.verify.id){
-    var id = req.query.id
+  if( req.body && req.body.verify && req.body.verify.id){
+    var id = req.body.id
     dao.userDao.findByPrimaryKey([id], function(status, result){
       if( 1 === status && result[0]){
-        obj._code = "201";
-        obj._msg = "查找失败..";
+        obj._code = "200";
+        obj._msg = "查找成功";
         obj._data = result[0];
         callback(obj);
       }
@@ -509,9 +509,9 @@ function updateUserInfo(req, callback){
     var params = {
       password: req.body.password
     }
-    var id = params.body.id;
+    var id = req.body.id;
     dao.userDao.updateByPrimaryKey([params, id], function(status, result){
-      if( 1 === status && result[0]){
+      if( 1 === status){
         obj._code = "200";
         obj._msg = "修改成功";
         obj._data = {};
@@ -535,11 +535,10 @@ function updateUserInfo(req, callback){
 
 // 删除用户信息
 function deleteUser(req, callback){
-  if(req.query && req.body.verify && req.body.verify.id){
-    var id = params.query.id;
-
+  if(req.body && req.body.verify && req.body.verify.id){
+    var id = req.body.id;
     dao.userDao.deleteByPrimaryKey([id], function(status, result){
-      if( 1 === status && result[0]){
+      if( 1 === status){
         obj._code = "200";
         obj._msg = "删除成功";
         obj._data = {};
@@ -563,15 +562,17 @@ function deleteUser(req, callback){
 
 // 查看钱包信息
 function getWalletInfo(req, callback){
-  if(req.query && req.body.verify && req.body.verify.id){
+  if(req.body && req.body.verify && req.body.verify.id){
     var params = {
-      id: req.query.id
+      id: req.body.id
     }
 
     dao.adminDao.findByPrimaryKey(params, function(status, result){
-      if( 1 === status && result[0]){
+      if( 1 === status){
         obj._code = "201";
-        obj._msg = "查看失败..";
+        obj._msg = "查看成功..";
+        delete result[0].password;    // delete表示隐藏属性
+        delete result[0].privateKey;
         obj._data = result[0];
         callback(obj);
       }
