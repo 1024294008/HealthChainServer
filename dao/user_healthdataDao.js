@@ -17,10 +17,10 @@ function insert(params, callback){
   })
 }
 
-// 参数{"id": 12}
+// 参数 id
 function deleteByPrimaryKey(params, callback){
   var sql_delete = "delete from user_healthdata where id = ?"
-  conn.query(sql_delete, params.id, function(err, res){
+  conn.query(sql_delete, [params], function(err, res){
     if(err){
       console.log('[DELETE ERROR] - ',err.message);
       callback(0);
@@ -31,10 +31,10 @@ function deleteByPrimaryKey(params, callback){
   })
 }
 
-// 查找最新一条数据 参数{"userid": 12}
+// 查找最新一条数据 参数 userid
 function findLatestData(params, callback){
   var sql_select = "select * from user_healthdata where 1 = 1 and userid = ? and id in (select max(id) from user_healthdata where userid = ?)"
-  conn.query(sql_insert, [params.userid, params.userid], function(err, res){
+  conn.query(sql_insert, [params, params], function(err, res){
     if(err){
       console.log('[FIND ERROR] - ',err.message);
       callback(0);
