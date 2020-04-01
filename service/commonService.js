@@ -14,6 +14,7 @@ function getOrgInfo(req, callback){
         obj._code = '200'
         obj._msg = '查找成功'
         delete result[0].password
+        delete result[0].privateKey
         obj._data.orgInfo = result[0]
         callback(obj)
       }else{

@@ -91,7 +91,7 @@ function findByAccount(params, callback){
 
 // 参数列表{"certificateResult": "..", "limit": 1, "page": 2}
 function findByConditionsCount(params, callback){
-  var sql_select_count = 'select count(*) from organization where 1 = 1 '  // 注意末尾空格
+  var sql_select_count = 'select count(*) as allCount from organization where 1 = 1 '  // 注意末尾空格
 
   if(params.certificateResult != "" && params.certificateResult != null)
     sql_select_count += 'and certificateResult = ' + '\"'  + params.certificateResult + '\" ' // 字符串拼接需要引号，注意末尾空格
@@ -111,14 +111,14 @@ function findByConditionsCount(params, callback){
 
 // 参数列表{"certificateResult": "已通过", "limit": 1, "page": 2}
 function findByConditions(params, callback){
-  var sql_select = 'select * from admin where 1 = 1 ' // 注意末尾空格
+  var sql_select = 'select * from organization where 1 = 1 ' // 注意末尾空格
 
   if(params.certificateResult != "" && params.certificateResult != null)
     sql_select += 'and certificateResult = ' + '\"'  + params.certificateResult + '\" ' // 字符串拼接需要引号，注意末尾空格
 
-  sql_select += 'limit ?, ?';
+  sql_select += 'limit' + params.limit*(params.page-1) + ',' + params.limit
 
-  conn.query(sql_select, [params.limit*(params.page-1), params.limit],function(err, result){
+  conn.query(sql_select, "",function(err, result){
 
     if(err){
       console.log('[FIND ERROR] - ',err.message);
