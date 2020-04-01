@@ -34,6 +34,7 @@ function deleteByPrimaryKey(params, callback){
 
 // 更新机构用户的信息[{},id]
 function updateByPrimaryKey(params, callback){
+  console.log(params)
   var sql_update = "update organization set ? where id = ?"
   conn.query(sql_update, params, function(err,result){
     if(err){

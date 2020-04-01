@@ -20,6 +20,7 @@ module.exports = function(app){
   app.use('/api/admin/updateAdmin', require('./admin/updateAdmin'))
   app.use('/api/admin/getAdminList', require('./admin/getAdminList'))
   app.use('/api/admin/getOrgInfoList', require('./admin/getOrgInfoList'))
+  app.use('/api/admin/updateOrgInfo', require('./admin/updateOrgInfo'))
 
   /* common路由 */
   app.use('/api/common/getOrgInfo', require('./common/getOrgInfo'))

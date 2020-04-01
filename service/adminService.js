@@ -219,7 +219,7 @@ function getOrgInfoList(req, callback){
           }
           else{
             obj._code = "201";
-            obj._msg = "查找失败..";
+            obj._msg = "查找失败！..";
             obj._data = {};
             callback(obj);
           }
@@ -227,7 +227,7 @@ function getOrgInfoList(req, callback){
       }
       else{
         obj._code = "201";
-        obj._msg = "查找失败..";
+        obj._msg = "查找失败....";
         obj._data = {};
         callback(obj);
       }
@@ -247,12 +247,12 @@ function getOrgInfoList(req, callback){
 function updateOrgInfo(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     var params = {
-      certificateResult: req.certificateResult
+      certificateResult: req.body.certificateResult
     }
-    var id = req.id;
+    var id = req.body.id;
 
-    dao.orgDao.updateOrgInfo([params, id], function(status, result){
-      if( 1 === status && result[0]){
+    dao.orgDao.updateByPrimaryKey([params, id], function(status, result){
+      if( 1 === status){
         obj._code = "200";
         obj._msg = "修改成功";
         obj._data = {};
@@ -260,7 +260,7 @@ function updateOrgInfo(req, callback){
       }
       else{
         obj._code = "201";
-        obj._msg = "查找失败..";
+        obj._msg = "修改失败..";
         obj._data = {};
         callback(obj);
       }
@@ -269,7 +269,7 @@ function updateOrgInfo(req, callback){
   }
   else{
     obj._code = "201";
-    obj._msg = "查找失败..";
+    obj._msg = "修改失败..";
     obj._data = {};
     callback(obj);
   }
