@@ -80,7 +80,7 @@ function findByEthAddress(params, callback){
 }
 
 function findByConditionsCount(params, callback){
-  var sql_select_count = 'select count(*) from user where 1 = 1 '  // 注意末尾空格
+  var sql_select_count = 'select count(*) as allCount from user where 1 = 1 '  // 注意末尾空格
 
   console.log(sql_select_count)
 
@@ -98,13 +98,13 @@ function findByConditionsCount(params, callback){
 function findByConditions(params, callback){
   var sql_select = 'select * from user where 1 = 1 ' // 注意末尾空格
 
-  sql_select += 'limit ?, ?';
+  sql_select += 'limit ' + params.limit*(params.page-1) + ',' + params.limit
+  // sql_select += 'limit ?, ?';
 
-  conn.query(sql_select, [params.limit*(params.page-1), params.limit],function(err, res){
-
+  conn.query(sql_select, "",function(err, res){
     if(err){
       console.log('[FIND ERROR] - ',err.message);
-      callback(0);
+      callback(0, res);
       return;
      }
     console.log("查找成功~");
