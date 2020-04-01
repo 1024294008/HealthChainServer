@@ -17,11 +17,11 @@ function insert(params, callback){
   })
 }
 
-// 参数{"id": 123}
+// 参数 id
 function deleteByPrimaryKey(params, callback){
   var sql_delete = "delete from transactionrecord where id = ?"
 
-  conn.query(sql_delete, params.id, function(err, res){
+  conn.query(sql_delete, [params], function(err, res){
     if(err){
       console.log('[DELETE ERROR] - ',err.message);
       callback(0);
@@ -32,11 +32,11 @@ function deleteByPrimaryKey(params, callback){
   })
 }
 
-// 参数{"id": 123}
+// 参数 id
 function findByPrimaryKey(params, callback){
   var sql_select = "select * from transactionrecord where 1 = 1 and id = ?"
 
-  conn.query(sql_select, params.id, function(err, res){
+  conn.query(sql_select, [params], function(err, res){
     if(err){
       console.log('[FIND ERROR] - ',err.message);
       callback(0);

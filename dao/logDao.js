@@ -16,11 +16,11 @@ function insert(params, callback){
   })
 }
 
-// 参数{"id": 12}
+// 参数 id
 function deleteByPrimaryKey(params, callback){
   var sql_delete = "delete from log where id = ?"
 
-  conn.query(sql_delete, params.id, function(err, res){
+  conn.query(sql_delete, [params], function(err, res){
     if(err){
       console.log('[DELETE ERROR] - ',err.message);
       callback(0);
