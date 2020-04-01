@@ -66,7 +66,7 @@ function findByAccount(params, callback){
       callback(0);
       return;
      }
-      console.log("管理员查找成功");
+      console.log("管理员账号查找成功");
       callback(1, res);
   })
 }
@@ -125,6 +125,7 @@ function findByConditions(params, callback){
       return;
      }
       console.log("管理员查找成功");
+      console.log(res)
       callback(1, res);
   })
 }

@@ -51,7 +51,7 @@ function login(req, callback){
 
 // 添加管理员
 function addAdminInfo(req, callback){
-  if(req.body && req.body.account && req.body.password && req.body.verify && req.body.verify.id && req.body.verify.id === 0){
+  if(req.body && req.body.account && req.body.password && req.body.verify && req.body.verify.id && req.body.verify.id === 1){
 
     var ethaddr = "0xxxx788xx" // 调用web3产生的账户
     var key = "0xxxxx556xx"  // 调用web3产生的
@@ -102,7 +102,7 @@ function addAdminInfo(req, callback){
 
 // 根据id删除
 function deleteAdmin(req, callback){
-  if(req.body && req.body.verify && req.body.verify.id && req.body.id && req.body.verify.id === 0){
+  if(req.body && req.body.verify && req.body.verify.id && req.body.id && req.body.verify.id === 1){
     var params = req.body.id
     dao.adminDao.deleteByPrimaryKey(params, function(status, result){
       if( 1 === status && result[0]){
@@ -124,7 +124,7 @@ function deleteAdmin(req, callback){
 
 // 修改管理员信息
 function updateAdmin(req, callback){
-  if(req.body && req.body.password && req.body.verify && req.body.verify.id && req.body.id &&  req.body.verify.id === 0){
+  if(req.body && req.body.password && req.body.verify && req.body.verify.id && req.body.id &&  req.body.verify.id === 1){
     var admin = {
       password: req.body.password,
     }
@@ -156,9 +156,9 @@ function updateAdmin(req, callback){
 
 // 获取管理员列表
 function getAdminList(req, callback){
-  if(req.body && req.body.verify && req.body.verify.id && req.body.verify.id === 0){
+  if(req.body && req.body.verify && req.body.verify.id && req.body.verify.id === 1){
     var params = {
-      authority: req.body.authority,
+      authority: '',
       limit: req.body.limit,
       page: req.body.page
     }
@@ -167,7 +167,6 @@ function getAdminList(req, callback){
         objList._code = "200";
         objList._msg = "查找成功";
         objList._data.dataList.count = result[0].allCount; // select count(*) as allCount .... 使用了命名allCount
-
         dao.adminDao.findByConditions(params, function(st, re){
           if( 1 === st && re[0]){
             objList._data.dataList.data = re;
@@ -193,7 +192,7 @@ function getAdminList(req, callback){
   }
   else{
     obj._code = "201";
-    obj._msg = "查找失败..";
+    obj._msg = "查找失败.....";
     obj._data = {};
     callback(obj);
   }
@@ -220,7 +219,7 @@ function getOrgInfoList(req, callback){
           }
           else{
             obj._code = "201";
-            obj._msg = "查找失败..";
+            obj._msg = "查找失败！..";
             obj._data = {};
             callback(obj);
           }
@@ -228,7 +227,7 @@ function getOrgInfoList(req, callback){
       }
       else{
         obj._code = "201";
-        obj._msg = "查找失败..";
+        obj._msg = "查找失败....";
         obj._data = {};
         callback(obj);
       }
@@ -248,12 +247,12 @@ function getOrgInfoList(req, callback){
 function updateOrgInfo(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     var params = {
-      certificateResult: req.certificateResult
+      certificateResult: req.body.certificateResult
     }
-    var id = req.id;
+    var id = req.body.id;
 
-    dao.orgDao.updateOrgInfo([params, id], function(status, result){
-      if( 1 === status && result[0]){
+    dao.orgDao.updateByPrimaryKey([params, id], function(status, result){
+      if( 1 === status){
         obj._code = "200";
         obj._msg = "修改成功";
         obj._data = {};
@@ -261,7 +260,7 @@ function updateOrgInfo(req, callback){
       }
       else{
         obj._code = "201";
-        obj._msg = "查找失败..";
+        obj._msg = "修改失败..";
         obj._data = {};
         callback(obj);
       }
@@ -270,7 +269,7 @@ function updateOrgInfo(req, callback){
   }
   else{
     obj._code = "201";
-    obj._msg = "查找失败..";
+    obj._msg = "修改失败..";
     obj._data = {};
     callback(obj);
   }
