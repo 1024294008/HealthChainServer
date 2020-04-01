@@ -203,8 +203,8 @@ function getOrgInfoList(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     var params = {
       certificateResult: req.body.certificateResult,
-      limit: req.limit,
-      page: req.page
+      limit: req.body.limit,
+      page: req.body.page
     }
     dao.orgDao.findByConditionsCount(params, function(status, result){
       if( 1 === status && result[0]){
@@ -280,7 +280,7 @@ function delOrgInfo(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     var id = req.body.id;
     dao.orgDao.deleteByPrimaryKey([id], function(status, result){  // 这里的参数要给成[]
-      if( 1 === status && result[0]){
+      if( 1 === status){
         obj._code = "200";
         obj._msg = "删除成功";
         obj._data = {};
@@ -308,8 +308,8 @@ function findMedicalServiceList(req, callback){
       var params = {
         serviceName: req.body.serviceName,
         auditResult: req.body.auditResult,
-        limit: req.limit,
-        page: req.page
+        limit: req.body.limit,
+        page: req.body.page
       }
 
       dao.medicalServiceDao.findByConditionsCount(params, function(status, result){
@@ -358,7 +358,7 @@ function updateMedicalServcie(req, callback){
     var id = req.body.id;
 
     dao.medicalServiceDao.updateByPrimaryKey([params, id], function(status, result){
-      if( 1 === status && result[0]){
+      if( 1 === status){
         obj._code = "200";
         obj._msg = "修改成功..";
         obj._data = {};
@@ -392,8 +392,8 @@ function getLogList(req, callback){
     var params = {
       operateTime: req.body.operateTime,
       operateResult: req.body.operateResult,
-      limit: req.limit,
-      page: req.page
+      limit: req.body.limit,
+      page: req.body.page
     }
 
     dao.medicalServiceDao.findByConditionsCount(params, function(status, result){

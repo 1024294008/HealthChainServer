@@ -33,7 +33,7 @@ function deleteByPrimaryKey(params, callback){
 
 // 参数列表{"operateTime": "", "operateResult": "", "limit": 1, "page": 2}
 function findByConditionsCount(params, callback){
-  var sql_select_count = 'select count(*) from log where 1 = 1 '  // 注意末尾空格
+  var sql_select_count = 'select count(*) as allCount from log where 1 = 1 '  // 注意末尾空格
 
   if(params.operateTime != "" && params.operateTime != null)
     sql_select_count += 'and operateTime = ' + '\"'  + params.operateTime + '\" ' // 字符串拼接需要引号，注意末尾空格
@@ -64,9 +64,10 @@ function findByConditions(params, callback){
   if(params.operateResult != "" && params.operateResult != null)
    sql_select += 'or operateResult = ' + '\"' + params.operateResult + '\" '
 
-  sql_select += 'limit ?, ?';
+  sql_select += 'limit ' + params.limit*(params.page-1) + ',' + params.limit
+  // sql_select += 'limit ?, ?';
 
-  conn.query(sql_select, [params.limit*(params.page-1), params.limit], function(err, res){
+  conn.query(sql_select, "", function(err, res){
     if(err){
       console.log('[FIND ERROR] - ',err.message);
       callback(0);

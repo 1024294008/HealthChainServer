@@ -44,6 +44,45 @@ function findLatestData(params, callback){
   })
 }
 
+// 根据id查找
+function findByPrimaryKey(params, callback){
+  var sql_select = 'select * from user_healthdata where 1 = 1 and id = ?'
+  conn.query(sql_insert, [params], function(err, res){
+    if(err){
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0);
+     }
+     console.log("查找成功~");
+     callback(1, res);
+  })
+}
+
+// 查找自己所有的健康  userid
+function findAllDateById(params, callback){
+  var sql_select = 'select * from user_healthdata where 1 = 1 and userid = ?'
+  conn.query(sql_insert, [params], function(err, res){
+    if(err){
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0);
+     }
+     console.log("查找成功~");
+     callback(1, res);
+  })
+}
+
+// 根据id  和 用户 id查询
+function findByIdAndUserId(params, callback){
+  var sql_select = 'select * from user_healthdata where 1 = 1 and id = ? and userid = ?'
+  conn.query(sql_insert, [params], function(err, res){
+    if(err){
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0);
+     }
+     console.log("查找成功~");
+     callback(1, res);
+  })
+}
+
 // 参数列表{"userid": "", "userType": "", "uploadTime":"", "eval": "", "permitVisit": "", "limit": 1, "page": 2}
 function findByConditionsCount(params, callback){
   var sql_select_count = 'select count(*) user_healthdata log where 1 = 1 '  // 注意末尾空格
@@ -112,5 +151,7 @@ function findByConditions(params, callback){
 module.exports = {
   insert,
   findLatestData,
+  findAllDateById,
+  findByPrimaryKey,
   findByConditions
 }

@@ -116,7 +116,7 @@ function findByConditions(params, callback){
   if(params.certificateResult != "" && params.certificateResult != null)
     sql_select += 'and certificateResult = ' + '\"'  + params.certificateResult + '\" ' // 字符串拼接需要引号，注意末尾空格
 
-  sql_select += 'limit' + params.limit*(params.page-1) + ',' + params.limit
+  sql_select += 'limit ' + params.limit*(params.page-1) + ',' + params.limit
 
   conn.query(sql_select, "",function(err, result){
 
