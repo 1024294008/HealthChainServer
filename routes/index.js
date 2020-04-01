@@ -22,5 +22,7 @@ module.exports = function(app){
   app.use('/api/admin/getOrgInfoList', require('./admin/getOrgInfoList'))
 
   /* common路由 */
-
+  app.use('/api/common/getOrgInfo', require('./common/getOrgInfo'))
+  app.use('/api/common/getMedicalServiceInfo', require('./common/getMedicalServiceInfo'))
+  app.use('/api/common/transfer', require('./common/transfer'))
 }
