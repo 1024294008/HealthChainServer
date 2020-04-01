@@ -81,7 +81,7 @@ function findAllAudited(callback){
 }
 
 function findByConditionsCount(params, callback){
-  var sql_select_count = 'select count(*) from medicalservice where 1 = 1 '  // 注意末尾空格
+  var sql_select_count = 'select count(*) as allCount from medicalservice where 1 = 1 '  // 注意末尾空格
 
   if(params.oid)
     sql_select_count += 'and oid = ' + '\"'  + params.oid + '\" ' // 字符串拼接需要引号，注意末尾空格
@@ -94,7 +94,7 @@ function findByConditionsCount(params, callback){
   conn.query(sql_select_count, "",function(err, res){
     if(err){
       console.log('[FIND ERROR] - ',err.message);
-      callback(0);
+      callback(0, res);
       return;
      }
     console.log("条数查找成功~");
@@ -111,13 +111,13 @@ function findByConditions(params, callback){
   if(params.auditResult)
     sql_select += 'and auditResult = ' + '\"'  + params.auditResult + '\" ' // 字符串拼接需要引号，注意末尾空格
 
-  sql_select += 'limit ?, ?';
+  sql_select += 'limit ' + params.limit*(params.page-1) + ',' + params.limit
+  // sql_select += 'limit ?, ?';
 
-  conn.query(sql_select, [params.limit*(params.page-1), params.limit],function(err, res){
-
+  conn.query(sql_select, "",function(err, res){
     if(err){
       console.log('[FIND ERROR] - ',err.message);
-      callback(0);
+      callback(0, res);
       return;
      }
     console.log("查找成功~");
