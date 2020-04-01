@@ -65,28 +65,72 @@ function findByAccount(params, callback){
     callback(1, result);
   })
 }
-/*
-// 参数列表[authority]
-function findByConditions(params){
-  var sql_select = "select * from admin where 1 = 1"
-  if(params != "")
-    sql_select += "and authority = ?"
-  conn.query(sql_select, params,function(err, res){
 
+// 获取所有审核通过的医疗服务
+function findAllAudited(callback){
+  var sql_select = "select * from medicalservice where auditResult = '审核通过'"
+  conn.query(sql_select, function(err, result){
     if(err){
-      console.log('[INSERT ERROR] - ',err.message);
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0)
       return;
-     }
-    console.log("查找成功~")
-    return res;
+    }
+    console.log("查找成功")
+    callback(1, result);
   })
 }
-*/
+
+function findByConditionsCount(params, callback){
+  var sql_select_count = 'select count(*) from medicalservice where 1 = 1 '  // 注意末尾空格
+
+  if(params.oid)
+    sql_select_count += 'and oid = ' + '\"'  + params.oid + '\" ' // 字符串拼接需要引号，注意末尾空格
+
+  if(params.auditResult)
+    sql_select_count += 'and auditResult = ' + '\"'  + params.auditResult + '\" ' // 字符串拼接需要引号，注意末尾空格
+
+  console.log(sql_select_count)
+
+  conn.query(sql_select_count, "",function(err, res){
+    if(err){
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0);
+      return;
+     }
+    console.log("条数查找成功~");
+    callback(1, res);
+  })
+}
+
+function findByConditions(params, callback){
+  var sql_select = 'select * from medicalservice where 1 = 1 ' // 注意末尾空格
+
+  if(params.oid)
+    sql_select += 'and oid = ' + '\"'  + params.oid + '\" ' // 字符串拼接需要引号，注意末尾空格
+
+  if(params.auditResult)
+    sql_select += 'and auditResult = ' + '\"'  + params.auditResult + '\" ' // 字符串拼接需要引号，注意末尾空格
+
+  sql_select += 'limit ?, ?';
+
+  conn.query(sql_select, [params.limit*(params.page-1), params.limit],function(err, res){
+
+    if(err){
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0);
+      return;
+     }
+    console.log("查找成功~");
+    callback(1, res);
+  })
+}
 module.exports = {
   insert,
   deleteByPrimaryKey,
   updateByPrimaryKey,
   findByPrimaryKey,
   findByAccount,
-  // findByConditions,
+  findAllAudited,
+  findByConditionsCount,
+  findByConditions
 }
