@@ -132,7 +132,7 @@ function findByConditions(params, callback){
 
 // 通过服务id查询服务信息和机构信息
 function findByServiceId(params, callback){
-  var sql_select = "select medicalservice.id as id, organization.portrait as portrait_org, organizationName, introduction,serviceName,serviceDetails,cost, tel from organization, medicalservice where organization.id = (select oid from medicalservice where medicalservice.id = ?)"
+  var sql_select = "select medicalservice.id as id, organization.portrait as portrait_org, organizationName, introduction,serviceName,serviceDetails,cost, tel from organization, medicalservice where organization.id = medicalservice.oid and organization.id = (select oid from medicalservice where id = ?)"
   conn.query(sql_select, params, function(err, result){
     if(err){
       console.log('[FIND ERROR] - ',err.message);
