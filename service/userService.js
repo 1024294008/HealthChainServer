@@ -148,31 +148,27 @@ function getMedicalServiceList(req, callback){
   })
 }
 
-// 获取历史信息
+// 获取健康数据
 function getHealthData(req, callback){
-  if(req.body && req.body.verify && req.body.verify.id && req.body.latest){
-    if(1 === req.body.latest){
-      // 查询最近一条数据
-      dao.user_healthdataDao.findLatestData({userid: req.body.verify.id}, function(status, result){
-        if(1 === status && result[0]){
-          // 通过得到的地址获取数据
-          callback()
-        } else {
-          obj._code = '201'
-          obj._msg = '查询失败'
-          obj._data = {}
-          callback(obj)
+  if(req.body && req.body.verify){
+    dao.user_healthdataDao.findAllDataById(req.body.verify.id, function(status, result){
+      if(1 === status){
+        obj._code = '200'
+        obj._msg = '查询成功'
+        obj._data = {
+          healthMetaDataList: result
         }
-      })
-    } else {
-      // 查询全部数据
-      // dao.user_healthdataDao.findByConditions()
-    }
+        callback(obj)
+      } else {
+        obj._code = '201'
+        obj._msg = '查询失败'
+        obj._data = {}
+      }
+    })
   } else {
-    obj._code = '201'
+    obj._code = '200'
     obj._msg = '查询失败'
     obj._data = {}
-    callback(obj)
   }
 }
 
