@@ -29,6 +29,8 @@ function login(req, callback){
         obj._code = "200";
         obj._msg = "登录成功~";
         obj._data.token = createToken({id: result[0].id, type: 'admin'})
+        delete result[0].privateKey;
+        delete result[0].contractAddr;
         obj._data.adminInfo = result[0];
         callback(obj);
       }
@@ -55,7 +57,7 @@ function addAdminInfo(req, callback){
 
     var ethaddr = "0xxxx788xx" // 调用web3产生的账户
     var key = "0xxxxx556xx"  // 调用web3产生的
-    var bal = 0.000
+    var cAddr = "0xxxxxx889999"  // 合约地址
 
     var admin = {
       account: req.body.account,
@@ -63,7 +65,7 @@ function addAdminInfo(req, callback){
       authority: req.body.authority,
       ethAddress: ethaddr,
       privateKey: key,
-      balance: bal
+      contractAddr: cAddr
     }
 
     // 判断账户是否存在

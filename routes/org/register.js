@@ -4,10 +4,9 @@ var router = express.Router()
 var service = require('../../service')
 
 router.post('/', function(req, res, next){
-  service.orgService.login(req, function(result){
+  service.orgService.register(req, function(result){
     res.json(result)
   })
 })
-
 
 module.exports = router
