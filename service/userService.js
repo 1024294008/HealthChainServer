@@ -16,6 +16,8 @@ function login(req, callback){
         obj._code = '200'
         obj._msg = '登录成功'
         obj._data.token = createToken({id: result[0].id, type: 'user'})
+        delete result[0].privateKey
+        delete result[0].contractAddr
         obj._data.userInfo = result[0]
         callback(obj)
       } else {
@@ -39,7 +41,7 @@ function register(req, callback){
     // 生成私钥和地址
     req.body.privateKey = '0xa82f32bfa82f32bfa82f32bfa82f32bfa82f32b1'
     req.body.ethAddress = '0xfa82f3fa82f3fa82f3fa82f3fa82f3fa82f3fa8f'
-    req.body.balance = 0
+    req.body.contractAddr = '0xfa82f3fa82f3fa82f3fa82f3fa82f3fa82f3fa8f'
 
     // 判定账户是否已存在
     dao.userDao.findByAccount(req.body.account, function(status, result){
@@ -80,6 +82,7 @@ function getUserInfo(req, callback){
         obj._code = '200'
         obj._msg = '查询成功'
         delete result[0].privateKey
+        delete result[0].contractAddr
         obj._data = result[0]
         callback(obj)
       } else {
