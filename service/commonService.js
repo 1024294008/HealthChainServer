@@ -80,8 +80,8 @@ function getServiceAndOrg(req, callback){
   if(req.query && req.query.id){
     dao.medicalServiceDao.findByPrimaryKey(req.query.id, function(status, result){
       if(1 === status && result[0] && result[0].oid){
-        obj._code = '200'
-        obj._msg = '查找成功'
+        obj_service_org._code = '200'
+        obj_service_org._msg = '查找成功'
         dao.orgDao.findByPrimaryKey(result[0].oid, function(stat, resu){
           if(1 === stat && resu[0]){
             obj_service_org._data.orgInfo.portrait_org = resu[0].portrait
@@ -94,23 +94,23 @@ function getServiceAndOrg(req, callback){
             obj_service_org._data.serviceInfo.cost = result[0].cost
             callback(obj_service_org)
           }else{
-            obj._code = '201'
-            obj._msg = '查找失败'
-            obj._data = {}
+            obj_service_org._code = '201'
+            obj_service_org._msg = '查找失败'
+            obj_service_org._data = {}
             callback(obj_service_org)
           }
         })
       }else{
-        obj._code = '201'
-        obj._msg = '查找失败'
-        obj._data = {}
+        obj_service_org._code = '201'
+        obj_service_org._msg = '查找失败'
+        obj_service_org._data = {}
         callback(obj_service_org)
       }
     })
   }else{
-    obj._code = '201'
-    obj._msg = '查找失败'
-    obj._data = {}
+    obj_service_org._code = '201'
+    obj_service_org._msg = '查找失败'
+    obj_service_org._data = {}
     callback(obj_service_org)
   }
 }
