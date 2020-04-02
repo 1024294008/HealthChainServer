@@ -34,7 +34,7 @@ function deleteByPrimaryKey(params, callback){
 // 查找最新一条数据 参数 userid
 function findLatestData(params, callback){
   var sql_select = "select * from user_healthdata where 1 = 1 and userid = ? and id in (select max(id) from user_healthdata where userid = ?)"
-  conn.query(sql_insert, [params, params], function(err, res){
+  conn.query(sql_select, [params, params], function(err, res){
     if(err){
       console.log('[FIND ERROR] - ',err.message);
       callback(0);
@@ -47,7 +47,7 @@ function findLatestData(params, callback){
 // 根据id查找
 function findByPrimaryKey(params, callback){
   var sql_select = 'select * from user_healthdata where 1 = 1 and id = ?'
-  conn.query(sql_insert, [params], function(err, res){
+  conn.query(sql_select, [params], function(err, res){
     if(err){
       console.log('[FIND ERROR] - ',err.message);
       callback(0);
@@ -58,9 +58,9 @@ function findByPrimaryKey(params, callback){
 }
 
 // 查找自己所有的健康  userid
-function findAllDateById(params, callback){
+function findAllDataById(params, callback){
   var sql_select = 'select * from user_healthdata where 1 = 1 and userid = ?'
-  conn.query(sql_insert, [params], function(err, res){
+  conn.query(sql_select, params, function(err, res){
     if(err){
       console.log('[FIND ERROR] - ',err.message);
       callback(0);
@@ -73,7 +73,7 @@ function findAllDateById(params, callback){
 // 根据id  和 用户 id查询
 function findByIdAndUserId(params, callback){
   var sql_select = 'select * from user_healthdata where 1 = 1 and id = ? and userid = ?'
-  conn.query(sql_insert, [params], function(err, res){
+  conn.query(sql_select, params, function(err, res){
     if(err){
       console.log('[FIND ERROR] - ',err.message);
       callback(0);
@@ -85,7 +85,7 @@ function findByIdAndUserId(params, callback){
 
 // 参数列表{"userid": "", "userType": "", "uploadTime":"", "eval": "", "permitVisit": "", "limit": 1, "page": 2}
 function findByConditionsCount(params, callback){
-  var sql_select_count = 'select count(*) user_healthdata log where 1 = 1 '  // 注意末尾空格
+  var sql_select_count = 'select count(*) user_healthdata where 1 = 1 '  // 注意末尾空格
 
   if(params.userid != "" && params.userid != null)
     sql_select_count += 'and userid = ' + '\"'  + params.userid + '\" ' // 字符串拼接需要引号，注意末尾空格
@@ -151,7 +151,9 @@ function findByConditions(params, callback){
 module.exports = {
   insert,
   findLatestData,
-  findAllDateById,
+  findAllDataById,
   findByPrimaryKey,
+  findByIdAndUserId,
+  findByConditionsCount,
   findByConditions
 }

@@ -16,6 +16,8 @@ function login(req, callback){
         obj._code = '200'
         obj._msg = '登录成功'
         obj._data.token = createToken({id: result[0].id, type: 'user'})
+        delete result[0].privateKey
+        delete result[0].contractAddr
         obj._data.userInfo = result[0]
         callback(obj)
       } else {
@@ -39,7 +41,7 @@ function register(req, callback){
     // 生成私钥和地址
     req.body.privateKey = '0xa82f32bfa82f32bfa82f32bfa82f32bfa82f32b1'
     req.body.ethAddress = '0xfa82f3fa82f3fa82f3fa82f3fa82f3fa82f3fa8f'
-    req.body.balance = 0
+    req.body.contractAddr = '0xfa82f3fa82f3fa82f3fa82f3fa82f3fa82f3fa8f'
 
     // 判定账户是否已存在
     dao.userDao.findByAccount(req.body.account, function(status, result){
@@ -80,6 +82,7 @@ function getUserInfo(req, callback){
         obj._code = '200'
         obj._msg = '查询成功'
         delete result[0].privateKey
+        delete result[0].contractAddr
         obj._data = result[0]
         callback(obj)
       } else {
@@ -148,31 +151,27 @@ function getMedicalServiceList(req, callback){
   })
 }
 
-// 获取历史信息
+// 获取健康数据
 function getHealthData(req, callback){
-  if(req.body && req.body.verify && req.body.verify.id && req.body.latest){
-    if(1 === req.body.latest){
-      // 查询最近一条数据
-      dao.user_healthdataDao.findLatestData({userid: req.body.verify.id}, function(status, result){
-        if(1 === status && result[0]){
-          // 通过得到的地址获取数据
-          callback()
-        } else {
-          obj._code = '201'
-          obj._msg = '查询失败'
-          obj._data = {}
-          callback(obj)
+  if(req.body && req.body.verify){
+    dao.user_healthdataDao.findAllDataById(req.body.verify.id, function(status, result){
+      if(1 === status){
+        obj._code = '200'
+        obj._msg = '查询成功'
+        obj._data = {
+          healthMetaDataList: result
         }
-      })
-    } else {
-      // 查询全部数据
-      // dao.user_healthdataDao.findByConditions()
-    }
+        callback(obj)
+      } else {
+        obj._code = '201'
+        obj._msg = '查询失败'
+        obj._data = {}
+      }
+    })
   } else {
-    obj._code = '201'
+    obj._code = '200'
     obj._msg = '查询失败'
     obj._data = {}
-    callback(obj)
   }
 }
 
