@@ -7,7 +7,7 @@ module.exports = function(app){
   app.use('/api/user/register', require('./users/register'))
   app.use('/api/user/getUserInfo', require('./users/getUserInfo'))
   app.use('/api/user/updateUserInfo', require('./users/updateUserInfo'))
-  app.use('/api/user/getMedicalServiceList', require('./users/getMedicalServiceList'))
+  app.use('/api/user/getServiceList', require('./users/getMedicalServiceList'))
   app.use('/api/user/getHealthData', require('./users/getHealthData'))
 
   /* org路由 */
@@ -25,6 +25,11 @@ module.exports = function(app){
   app.use('/api/admin/findMedicalServiceList', require('./admin/findMedicalServiceList'))
   app.use('/api/admin/updateMedicalServcie', require('./admin/updateMedicalServcie'))
   app.use('/api/admin/getLogList', require('./admin/getLogList'))
+  app.use('/api/admin/getUserList', require('./admin/getUserList'))
+  app.use('/api/admin/findUserInfo', require('./admin/findUserInfo'))
+  app.use('/api/admin/updateUserInfo', require('./admin/updateUserInfo'))
+  app.use('/api/admin/deleteUser', require('./admin/deleteUser'))
+  app.use('/api/admin/getWalletInfo', require('./admin/getWalletInfo'))
 
   /* common路由 */
   app.use('/api/common/getOrgInfo', require('./common/getOrgInfo'))
