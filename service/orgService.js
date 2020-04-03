@@ -221,8 +221,9 @@ function updateMedicalService(req,callback){
     })
   }
 }
-//7
+// 删除医疗服务
 function delMedicalService(req,callback){
+  console.body("删除医疗服务");
   if(req.body && req.body.verify && req.body.verify.id && req.body.id){
     dao.medicalServiceDao.deleteByPrimaryKey(req.body.id,function(status,result){
       if (1 == status) {

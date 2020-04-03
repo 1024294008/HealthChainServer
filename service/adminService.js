@@ -327,6 +327,34 @@ function delOrgInfo(req, callback){
   }
 }
 
+// 删除医疗服务
+function deleteMedicalService(req, callback){
+  console.log("删除医疗服务~~");
+  if(req.body && req.body.verify && req.body.verify.id){
+    var id = req.body.id;
+    dao.medicalServiceDao.deleteByPrimaryKey(id, function(status, result){
+      if( 1 === status){
+        obj._code = "200";
+        obj._msg = "删除成功";
+        obj._data = {};
+        callback(obj);
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "删除失败..";
+        obj._data = {};
+        callback(obj);
+      }
+    })
+  }
+  else{
+    obj._code = "201";
+    obj._msg = "删除失败..";
+    obj._data = {};
+    callback(obj);
+  }
+}
+
 // 条件查询医疗服务
 function findMedicalServiceList(req, callback){
     if(req.body && req.body.verify && req.body.verify.id){
@@ -666,6 +694,7 @@ module.exports = {
   getOrgInfoList,
   updateOrgInfo,
   delOrgInfo,
+  deleteMedicalService,
   findMedicalServiceList,
   updateMedicalServcie,
   getLogList,
