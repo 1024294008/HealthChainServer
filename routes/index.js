@@ -32,6 +32,7 @@ module.exports = function(app){
   app.use('/api/admin/getOrgInfoList', require('./admin/getOrgInfoList'))
   app.use('/api/admin/updateOrgInfo', require('./admin/updateOrgInfo'))
   app.use('/api/admin/delOrgInfo', require('./admin/delOrgInfo'))
+  app.use('/api/admin/deleteService', require('./admin/deleteMedicalService'))
   app.use('/api/admin/findMedicalServiceList', require('./admin/findMedicalServiceList'))
   app.use('/api/admin/updateMedicalServcie', require('./admin/updateMedicalServcie'))
   app.use('/api/admin/getLogList', require('./admin/getLogList'))
