@@ -16,7 +16,10 @@ function login(req, callback){
         obj._code = '200'
         obj._msg = '登录成功'
         obj._data.token = createToken({id: result[0].id, type: result[0].type})
-        obj._data.userInfo = result[0]
+        delete result[0].password
+        delete result[0].privateKey
+        delete result[0].contractAddr
+        obj._data.userInfo = JSON.stringify(result[0])
         callback(obj)
       } else {
         obj._code = '201'
@@ -51,8 +54,9 @@ function register(req, callback){
         req.body.ethAddress = '0x79dE40505C7518e0283E6c4f01067b9da35d81d4';
         req.body.privateKey = '0x08cEsdjkfsjdfjksldk849394j34jk34hj344j3k';
         req.body.certificateResult = '未审核';
-        req.body.type = "0";//默认是其他账户类型，认证通过才会变更类型为可提供服务的医疗机构类型
-        req.body.balance = 0;//账户初始余额是0
+        req.body.type = "其他";//默认是其他账户类型，认证通过才会变更类型为可提供服务的医疗机构类型
+        req.body.contractAddr = "0x08cEsdjkfsjdfjksldk849394j34jk34hj344j3k";//账户合约部署地址
+
         dao.orgDao.insert(req.body,function(status, result){
           if(1===status){
             //注册成功
@@ -128,7 +132,6 @@ function updateOrgInfo(req, callback){
 //4机构获取自己的服务列表
 //要分页
 function getMedicalServiceList(req,callback){
-
   if(req.body.verify && req.body.verify.id){
     var json_getMyService = {
       "oid":req.body.verify.id,
@@ -138,14 +141,15 @@ function getMedicalServiceList(req,callback){
     dao.orgDao.findByConditionsCount(json_getMyService,function(status1,result1){
       if (1===status1) {
         //说明获取到了总数,继续获取分页数据
-        var count = result1.allCount;
+        var allCount = result1[0].allCount;
+
         dao.medicalServiceDao.findByConditions(json_getMyService,function(status2,result2){
           if (1===status2) {
             //说明获取成功
             var jsonResult = {
               code:0,
               msg:'',
-              count:count,
+              count:allCount,
               data:result2
             }
             callback(jsonResult)
@@ -170,9 +174,15 @@ function getMedicalServiceList(req,callback){
 //5注册服务
 function insertMedicalService(req,callback){
   if(req.body && req.body.verify && req.body.verify.id && req.body.serviceName && req.body.serviceDetails && req.body.cost){
-    req.body.oid = req.body.verify.id;
-    req.body.auditResult = "审核中";
-    dao.medicalServiceDao.insert(req.body,function(status,result){
+
+    var json_insertService = {
+      oid:req.body.verify.id,
+      auditResult:"审核中",
+      serviceName:req.body.serviceName,
+      serviceDetails:req.body.serviceDetails,
+      cost:req.body.cost
+    }
+    dao.medicalServiceDao.insert(json_insertService,function(status,result){
       if (1 == status) {
         obj._code = '200'
         obj._msg = '注册服务成功'
@@ -191,8 +201,12 @@ function insertMedicalService(req,callback){
 function updateMedicalService(req,callback){
   //服务的id不能空
   if(req.body && req.body.verify && req.body.verify.id && req.body.id){
-    req.body.oid = req.body.verify.id;
-    dao.medicalServiceDao.updateByPrimaryKey(req.body,function(status,result){
+    var json_updateService = {
+      serviceName:req.body.serviceName,
+      serviceDetails:req.body.serviceDetails,
+      cost:req.body.cost
+    }
+    dao.medicalServiceDao.updateByPrimaryKey([json_updateService,req.body.id],function(status,result){
       if (1 == status) {
         obj._code = '200'
         obj._msg = '修改服务成功'
@@ -209,8 +223,8 @@ function updateMedicalService(req,callback){
 }
 //7
 function delMedicalService(req,callback){
-  if(req.body && req.body.verify && req.body.verify.id && req.body.oid){
-    dao.medicalServiceDao.deleteByPrimaryKey(req.body.oid,function(status,result){
+  if(req.body && req.body.verify && req.body.verify.id && req.body.id){
+    dao.medicalServiceDao.deleteByPrimaryKey(req.body.id,function(status,result){
       if (1 == status) {
         obj._code = '200'
         obj._msg = '删除服务成功'
@@ -294,6 +308,47 @@ function getMyInfo(req,callback){
     })
   }
 }
+//11
+function updatePassword(req,callback){
+  if(req.body && req.body.verify && req.body.verify.id && req.body.password && req.body.newPassword){
+    dao.orgDao.findByPrimaryKey(req.body.verify.id,function(status,result){
+      if (1 == status) {
+        //拿到用户原始信息
+        if(req.body.password == result[0].password){
+          //允许修改
+          var json_password = {
+            password:req.body.newPassword
+          }
+          dao.orgDao.updateByPrimaryKey([json_password,req.body.verify.id],function(_status,_result){
+            if (1 == status) {
+              obj._code = '200'
+              obj._msg = '修改密码成功'
+              obj._data = []
+              callback(obj)
+            } else {
+              obj._code = '201'
+              obj._msg = '修改密码失败'
+              obj._data = {}
+              callback(obj)
+            }
+          })
+        }else{
+          //不允许修改
+          obj._code = '201'
+          obj._msg = '原密码错误！'
+          obj._data = {}
+          callback(obj)
+        }
+      } else {
+        //查询通过id查找原密码的过程中出现失败
+        obj._code = '201'
+        obj._msg = '出现错误，请重试！'
+        obj._data = {}
+        callback(obj)
+      }
+    })
+  }
+}
 module.exports = {
   login,
   register,
@@ -304,5 +359,6 @@ module.exports = {
   delMedicalService,
   buyHealthData,
   audit,
-  getMyInfo
+  getMyInfo,
+  updatePassword
 }
