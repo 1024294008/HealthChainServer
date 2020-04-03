@@ -41,7 +41,7 @@ module.exports = function(app){
   app.use('/api/admin/updateUserInfo', require('./admin/updateUserInfo'))
   app.use('/api/admin/deleteUser', require('./admin/deleteUser'))
   app.use('/api/admin/getWalletInfo', require('./admin/getWalletInfo'))
-
+  app.use('/api/admin/isSuperAdmin', require('./admin/isSuperAdmin'))
   /* common路由 */
   app.use('/api/common/getOrgInfo', require('./common/getOrgInfo'))
   app.use('/api/common/getMedicalServiceInfo', require('./common/getMedicalServiceInfo'))
