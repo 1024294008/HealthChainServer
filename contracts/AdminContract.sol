@@ -18,7 +18,7 @@ contract AdminContract{
         adminAddress = newAddr;
     }
 
-    function gethealthDataCount() public view returns(uint){
+    function gethealthDataCount() public view returns(uint32){
         return healthDataCount;
     }
 

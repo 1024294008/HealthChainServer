@@ -3,6 +3,7 @@ pragma solidity >=0.4.21 <0.7.0;
 // 声明其他合约的接口  -- 授权合约
 interface AdminContract{
     function getAdminAddress()  external view returns(address);
+    function gethealthDataCount() external view returns(uint32);
 }
 
 contract Health{
@@ -112,7 +113,7 @@ contract Health{
     address(uint160(ad)).transfer(100);   //  合约转钱给管理员
 
     visitors[to].name = name;
-    visitors[to].visitCount += 1;  // 购买次数，可以通过其他合约指定 adminContract.getNumxxx()
+    visitors[to].visitCount += adminContract.gethealthDataCount();  // 购买次数，可以通过其他合约指定 adminContract.getNumxxx()
     }
 
     // 回退函数
