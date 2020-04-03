@@ -166,13 +166,25 @@ function getAdminList(req, callback){
     }
     dao.adminDao.findByConditionsCount(params, function(status, result){
       if( 1=== status && result[0]){
-        objList._code = "200";
-        objList._msg = "查找成功";
-        objList._data.dataList.count = result[0].allCount; // select count(*) as allCount .... 使用了命名allCount
+        // objList._code = "200";
+        // objList._msg = "查找成功";
+        // objList._data.dataList.count = result[0].allCount; // select count(*) as allCount .... 使用了命名allCount
+
+        var res_json = {
+          code: 0,
+          msg: '',
+          count: 0,
+          data: []
+        }
+
+        res_json.count = result[0].allCount;
+
         dao.adminDao.findByConditions(params, function(st, re){
           if( 1 === st && re[0]){
-            objList._data.dataList.data = re;
-            callback(objList);
+            // objList._data.dataList.data = re;
+            // callback(objList);
+            res_json.data = re;
+            callback(res_json);
           }
           else {
             obj._code = "201";
@@ -210,14 +222,25 @@ function getOrgInfoList(req, callback){
     }
     dao.orgDao.findByConditionsCount(params, function(status, result){
       if( 1 === status && result[0]){
-        objList._code = "200";
-        objList._msg = "查找成功";
-        objList._data.dataList.count = result[0];
+        // objList._code = "200";
+        // objList._msg = "查找成功";
+        // objList._data.dataList.count = result[0];
+
+        var res_json = {
+          code: 0,
+          msg: '',
+          count: 0,
+          data: []
+        }
+
+        res_json.count = result[0].allCount;
 
         dao.orgDao.findByConditions(params, function(st, re){
           if( 1 === st && re[0]){
-            objList._data.dataList.data = re;
-            callback(objList);
+            // objList._data.dataList.data = re;
+            // callback(objList);
+            res_json.data = re;
+            callback(res_json);
           }
           else{
             obj._code = "201";
@@ -316,14 +339,23 @@ function findMedicalServiceList(req, callback){
 
       dao.medicalServiceDao.findByConditionsCount(params, function(status, result){
         if( 1 === status && result[0]){
-          objList._code = "200";
-          objList._msg = "查找成功";
-          objList._data.dataList.count = result[0];
+          // objList._code = "200";
+          // objList._msg = "查找成功";
+          // objList._data.dataList.count = result[0];
+
+          var res_json = {
+            code: 0,
+            msg: '',
+            count: 0,
+            data: []
+          }
+
+          res_json.count = result[0].allCount;
 
           dao.medicalServiceDao.findByConditions(params, function(st, re){
             if( 1 === st && re[0]){
-              objList._data.dataList.data = re;
-              callback(objList);
+              res_json.data = re;
+              callback(res_json);
             }
             else{
               obj._code = "201";
@@ -400,13 +432,27 @@ function getLogList(req, callback){
 
     dao.logDao.findByConditionsCount(params, function(status, result){
       if( 1 === status && result[0]){
-        objList._code = "200";
-        objList._msg = "查找成功";
-        objList._data.dataList.count = result[0];
+        // objList._code = "200";
+        // objList._msg = "查找成功";
+        // objList._data.dataList.count = result[0];
+
+        var res_json = {
+          code: 0,
+          msg: '',
+          count: 0,
+          data: []
+        }
+
+        res_json.count = result[0].allCount;
+
         dao.logDao.findByConditions(params, function(st, re){
           if( 1 === st && re[0]){
-            objList._data.dataList.data = re;
-            callback(objList);
+            // objList._data.dataList.data = re;
+            // callback(objList);
+
+            res_json.data = re;
+            callback(res_json);
+
           }
           else{
             console.log(re)
@@ -443,14 +489,26 @@ function getUserList(req, callback){
     }
     dao.userDao.findByConditionsCount(params, function(status, result){
       if( 1=== status && result[0]){
-        objList._code = "200";
-        objList._msg = "查找成功";
-        objList._data.dataList.count = result[0];
+        // objList._code = "200";
+        // objList._msg = "查找成功";
+        // objList._data.dataList.count = result[0];
+
+        var res_json = {
+          code: 0,
+          msg: '',
+          count: 0,
+          data: []
+        }
+
+        res_json.count = result[0].allCount;
 
         dao.userDao.findByConditions(params, function(st, re){
           if( 1=== st && re[0]){
-            objList._data.dataList.data = re;
-            callback(objList);
+            // objList._data.dataList.data = re;
+            // callback(objList);
+
+            res_json.data = re;
+            callback(res_json);
           }
           else {
             obj._code = "201";
