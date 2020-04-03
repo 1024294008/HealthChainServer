@@ -12,6 +12,16 @@ module.exports = function(app){
 
   /* org路由 */
   app.use('/api/org/login', require('./org/login'))
+  app.use('/api/org/register', require('./org/register'))
+  app.use('/api/org/audit', require('./org/audit'))
+  app.use('/api/org/buyHealthData', require('./org/buyHealthData'))
+  app.use('/api/org/delMedicalService', require('./org/delMedicalService'))
+  app.use('/api/org/getMedicalServiceList', require('./org/getMedicalServiceList'))
+  app.use('/api/org/getMyInfo', require('./org/getMyInfo'))
+  app.use('/api/org/insertMedicalService', require('./org/insertMedicalService'))
+  app.use('/api/org/updateMedicalService', require('./org/updateMedicalService'))
+  app.use('/api/org/updateOrgInfo', require('./org/updateOrgInfo'))
+  app.use('/api/org/updatePassword', require('./org/updatePassword'))
 
   /* admin路由 */
   app.use('/api/admin/login', require('./admin/login'))
