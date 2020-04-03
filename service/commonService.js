@@ -39,7 +39,7 @@ function getMedicalServiceInfo(req, callback){
       if(1 === status && result[0]){
         obj._code = '200'
         obj._msg = '查找成功'
-        obj._data.orgInfo = result[0]
+        obj._data.meidcalInfo = result[0]
         callback(obj)
       }else{
         obj._code = '201'
@@ -90,11 +90,33 @@ function transfer(req, callback){
     callback(obj)
   }
 }
-
-
+// 获取服务详情和对应的机构信息
+function getServiceAndOrg(req, callback){
+  if(req.query && req.query.id){
+    dao.orgDao.findByServiceId(req.query.id,function(status, result){
+      if(1 === status && result[0]){
+        obj._code = '200'
+        obj._msg = '查找成功'
+        obj._data.serviceAndOrgInfo = result[0]
+        callback(obj)
+      }else{
+        obj._code = '201'
+        obj._msg = '查找失败'
+        obj._data = {}
+        callback(obj)
+      }
+    })
+  }else{
+    obj._code = '201'
+    obj._msg = '查找失败'
+    obj._data = {}
+    callback(obj)
+  }
+}
 module.exports = {
   getOrgInfo,
   getMedicalServiceInfo,
   uploadHealthData,
-  transfer
+  getServiceAndOrg,
+  transfer,
 }

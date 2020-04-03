@@ -130,6 +130,19 @@ function findByConditions(params, callback){
   })
 }
 
+// 通过服务id查询服务信息和机构信息
+function findByServiceId(params, callback){
+  var sql_select = "select medicalservice.id as id, organization.portrait as portrait_org, organizationName, introduction,serviceName,serviceDetails,cost, tel from organization, medicalservice where organization.id = medicalservice.oid and medicalservice.id = ?"
+  conn.query(sql_select, params, function(err, result){
+    if(err){
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0)
+      return
+    }
+    console.log("查询成功")
+    callback(1, result)
+  })
+}
 module.exports = {
     insert,
     deleteByPrimaryKey,
@@ -138,5 +151,6 @@ module.exports = {
     findByEthAddress,
     findByAccount,
     findByConditionsCount,
-    findByConditions
+    findByConditions,
+    findByServiceId
 }
