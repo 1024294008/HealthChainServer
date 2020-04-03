@@ -508,6 +508,7 @@ function getUserList(req, callback){
             // callback(objList);
 
             res_json.data = re;
+
             callback(res_json);
           }
           else {
@@ -570,6 +571,9 @@ function updateUserInfo(req, callback){
       password: req.body.password
     }
     var id = req.body.id;
+
+    console.log([params, id]);
+
     dao.userDao.updateByPrimaryKey([params, id], function(status, result){
       if( 1 === status){
         obj._code = "200";
@@ -592,6 +596,7 @@ function updateUserInfo(req, callback){
     callback(obj);
   }
 }
+
 
 // 删除用户信息
 function deleteUser(req, callback){
