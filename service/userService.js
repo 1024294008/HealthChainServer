@@ -38,20 +38,28 @@ function login(req, callback){
 // 用户注册
 function register(req, callback){
   if(req.body && req.body.account && req.body.password){
-    // 生成私钥和地址
-    req.body.privateKey = '0xa82f32bfa82f32bfa82f32bfa82f32bfa82f32b1'
-    req.body.ethAddress = '0xfa82f3fa82f3fa82f3fa82f3fa82f3fa82f3fa8f'
-    req.body.contractAddr = '0xfa82f3fa82f3fa82f3fa82f3fa82f3fa82f3fa8f'
-
     // 判定账户是否已存在
     dao.userDao.findByAccount(req.body.account, function(status, result){
       if(1 === status && !result[0]){
-        dao.userDao.insert(req.body, function(status){
-          if(1 === status){
-            obj._code = '200'
-            obj._msg = '注册成功'
-            obj._data = {}
-            callback(obj)
+        // 生成私钥、地址、初始化智能合约
+        dao.ethDao.createAccout(function(status, result){
+          if(1 == status){
+            req.body.privateKey = result.privateKey
+            req.body.ethAddress = result.ethAddress
+            req.body.contractAddr = result.contractAddr
+            dao.userDao.insert(req.body, function(status){
+              if(1 === status){
+                obj._code = '200'
+                obj._msg = '注册成功'
+                obj._data = {}
+                callback(obj)
+              } else {
+                obj._code = '201'
+                obj._msg = '注册失败'
+                obj._data = {}
+                callback(obj)
+              }
+            })
           } else {
             obj._code = '201'
             obj._msg = '注册失败'
