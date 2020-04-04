@@ -1,5 +1,5 @@
 var dao = require('../dao')
-
+var BigNumber = require("bignumber.js")
 var obj = {
   _code: "",
   _msg: "",
@@ -56,40 +56,107 @@ function getMedicalServiceInfo(req, callback){
   }
 }
 
-// 上传健康数据
-function uploadHealthData(req, callback){
-  // 获取健康数据
-
-  // 数据上链
-}
-
-// 转账
-function transfer(req, callback){
-  console.log(req.body.verify)
-  if(req.body.verify && req.body.verify.id){
-    // 从参数中获取发送方和接收方的以太坊地址，金额 sendAddress, recieveAddress, transactEth
-
-    // 调用合约进行转账
-
-    //如果不抛出异常,转账成功,同时会更新链上余额
-    obj._code = '200'
-    obj._msg = '转账成功'
-    obj._data = {}
-    callback(obj)
-
-    //否则转账失败
-    // obj._code = '201'
-    // obj._msg = '转账失败'
-    // obj._data = {}
-    // callback(obj)
+// 机构上传健康数据
+function uploadOrgHealthData(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id && req.body.heartRate && req.body.heat && req.body.sleepQuality && req.body.distance && req.body.evaluation && req.body.permitVisit){
+    // 查找机构用户的私钥和合约地址
+    dao.orgDao.findByPrimaryKey(req.body.id, function(status1, result1){
+      if( 1 === status && result[0]){
+        var healthData = {
+          "heartRate": req.body.heartRate,
+          "heat": req.body.heat,
+          "sleepQuality": req.body.sleepQuality,
+          "distance": req.body.distance,
+          "evaluation": req.body.evaluation,
+          "uploadTime": "2020-4-4",
+          "permitVisit": req.body.permitVisit
+        }
+        var privateKey = result[0].privateKey
+        var contractAddr = result[0].contractAddr
+        dao.ethDao.addData(healthData, privateKey, contractAddr, function(status2, result2){
+          if(1 === status){
+            obj._code = '200'
+            obj._msg = '上传成功'
+            obj._data = {}
+            callback(obj)
+          }else{
+            obj._code = '201'
+            obj._msg = '上传失败'
+            obj._data = {}
+            callback(obj)
+          }
+        })
+      }else{
+        obj._code = '201'
+        obj._msg = '上传失败'
+        obj._data = {}
+        callback(obj)
+      }
+    })
   }else{
-
     obj._code = '201'
-    obj._msg = '转账失败'
+    obj._msg = '上传失败'
     obj._data = {}
     callback(obj)
   }
 }
+
+// // 转账
+// function transfer(req, callback){
+//   console.log(req.body.verify)
+//   if(req.body.verify && req.body.verify.id){
+//     // 获取发送方私钥
+//     dao.userDao.findByPrimaryKey(req.body.verify.id,function(status1, result1){
+//       if( 1 === status1 && result1[0]){
+//         //获取接收方地址
+//         dao.userDao.findByAccount(req.body.receiveAccount, function(status2, result2){
+//           if(1 === status2 && result2[0]){
+//             // 发送方私钥， 接收方以太坊地址, 转账金额
+//             dao.ethDao.transfer(result1[0].privateKey, result2[0].ethAddress, new BigNumber(req.body.value), function(status3, result3){
+//               if(1 === status3){
+//                 obj._code = '200'
+//                 obj._msg = '转账成功'
+//                 obj._data = {}
+//                 callback(obj)
+//                 // 将交易记录存到数据库
+//                 var record = {
+//                   "sendAddress": result1[0].ethAddress,
+//                   "receiveAddress": result2[0].ethAddress,
+//                   "transactEth": req.body.value,
+//                   "transactTime": "2020-4-4",
+
+
+//                 }
+//               }else{
+//                 obj._code = '201'
+//                 obj._msg = '转账失败'
+//                 obj._data = {}
+//                 callback(obj)
+//               }
+//             })
+//           }else{
+//             obj._code = '201'
+//             obj._msg = '转账失败'
+//             obj._data = {}
+//             callback(obj)
+//           }
+//         })
+//       }else{
+//         obj._code = '201'
+//         obj._msg = '转账失败'
+//         obj._data = {}
+//         callback(obj)
+//       }
+//     })
+//   }else{
+
+//     obj._code = '201'
+//     obj._msg = '转账失败'
+//     obj._data = {}
+//     callback(obj)
+//   }
+// }
+
 // 获取服务详情和对应的机构信息
 function getServiceAndOrg(req, callback){
   if(req.query && req.query.id){
@@ -116,7 +183,7 @@ function getServiceAndOrg(req, callback){
 module.exports = {
   getOrgInfo,
   getMedicalServiceInfo,
-  uploadHealthData,
   getServiceAndOrg,
-  transfer,
+  uploadOrgHealthData
+  // transfer,
 }

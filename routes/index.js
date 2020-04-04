@@ -47,4 +47,5 @@ module.exports = function(app){
   app.use('/api/common/getMedicalServiceInfo', require('./common/getMedicalServiceInfo'))
   app.use('/api/common/transfer', require('./common/transfer'))
   app.use('/api/common/getServiceAndOrg', require('./common/getServiceAndOrg'))
+  app.use('/api/common/uploadOrgHealthData', require('./common/uploadOrgHealthData'))
 }
