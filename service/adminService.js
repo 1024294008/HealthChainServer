@@ -705,7 +705,7 @@ function getWalletInfo(req, callback){
       {
         obj._code = "200";
         obj._msg = "余额获取成功";
-        obj._data.getBalance = result[0];
+        obj._data.getBalance = result;
         callback(obj);
       }
       else{
