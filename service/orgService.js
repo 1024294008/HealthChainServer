@@ -53,7 +53,7 @@ function register(req, callback){
         //账户不存在，注册！
         req.body.ethAddress = '0x79dE40505C7518e0283E6c4f01067b9da35d81d4';
         req.body.privateKey = '0x08cEsdjkfsjdfjksldk849394j34jk34hj344j3k';
-        req.body.certificateResult = '未审核';
+        req.body.certificateResult = '未上传';
         req.body.type = "其他";//默认是其他账户类型，认证通过才会变更类型为可提供服务的医疗机构类型
         req.body.contractAddr = "0x08cEsdjkfsjdfjksldk849394j34jk34hj344j3k";//账户合约部署地址
 
@@ -79,53 +79,36 @@ function register(req, callback){
 //3更改机构的个人信息
 function updateOrgInfo(req, callback){
   if(req.body.verify && req.body.verify.id){
-    //只能修改头像(机构的图片)，机构名，机构简介
-    if (req.body && req.body.portrait || req.body.organizationName || req.body.introductions) {
+    //只能修改头像(机构的图片)，机构名，机构简介，机构账号
+    if (req.body && req.body.portrait || req.body.organizationName || req.body.introduction) {
       //保存图片到服务器，再将路径记录下来
-
-
-
-
-      if(req.body.organizationName){
-        //把主键放进body
-        req.body.id = req.body.verify.id;
-        dao.orgDao.updateByPrimaryKey(req.body,function(status, result){
-          if (1===status) {
-            console.log(result)
-            //说明修改成功
-            obj._code = '200'
-            obj._msg = '信息更新成功！'
-            obj._data = {}
-            callback(obj)
-          }else{
-            obj._code = '201'
-            obj._msg = '账户名重复，请重新命名哦~'
-            obj._data = {}
-            callback(obj)
-          }
-        })
+      console.log(req.body.portrait)
+      var json_updateOrgInfo = {
+        portrait:req.body.portrait,
+        organizationName:req.body.organizationName,
+        introduction:req.body.introduction,
+        account:req.body.account
       }
-      if(req.body.introductions){
-        //把主键放进body
-
-        dao.orgDao.updateByPrimaryKey(req.body,function(status, result){
-          if (1===status) {
-            console.log(result)
-            //说明修改成功
-            obj._code = '200'
-            obj._msg = '信息更新成功！'
-            obj._data = {}
-            callback(obj)
-          }else{
-            obj._code = '201'
-            obj._msg = '修改失败，请重试哦~'
-            obj._data = {}
-            callback(obj)
-          }
-        })
-      }
+      dao.orgDao.updateByPrimaryKey([json_updateOrgInfo,req.body.verify.id],function(status, result){
+        if (1===status) {
+          console.log(result)
+          //说明修改成功
+          obj._code = '200'
+          obj._msg = '信息更新成功！'
+          obj._data = {}
+          callback(obj)
+        }else{
+          obj._code = '201'
+          obj._msg = '修改失败，请重试哦~'
+          obj._data = {}
+          callback(obj)
+        }
+      })
     } else {
-
+      obj._code = '201'
+      obj._msg = '信息不符合规范！'
+      obj._data = {}
+      callback(obj)
     }
   }
 }
@@ -266,13 +249,18 @@ function buyHealthData(req,callback){
 //9
 function audit(req,callback){
   if(req.body && req.body.verify && req.body.verify.id){
-    //拿到审核材料存到服务器本地，将路径存到数据库
-    var fileAddr = "";
-
-
-
-
-    dao.orgDao.updateByPrimaryKey('',function(status,result){
+    //审核材料已经在路由层存到服务器本地，此时只需将路径存到数据库
+    var date = new Date(Date.now());
+    var Y = date.getFullYear() + '/';
+    var M = (date.getMonth()+1 < 10 ? (date.getMonth()+1) : date.getMonth()+1) + '/';
+    var D = date.getDate();
+    var auditTime = Y+M+D
+    var json_audit = {
+      certificateFiles:req.body.fileName,
+      certificateTime:auditTime,
+      certificateResult:"审核中"
+    }
+    dao.orgDao.updateByPrimaryKey([json_audit, req.body.verify.id],function(status,result){
       if (1 == status) {
         obj._code = '200'
         obj._msg = '上传审核材料成功'
