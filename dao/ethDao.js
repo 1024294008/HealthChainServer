@@ -15,7 +15,7 @@ function createAccout(callback){
         arguments: [account.address, contractTool.adminContractAddress]     // 指定合约所属地址
     }).send({
         from: contractTool.adminAddress,
-        gas: 2000000
+        gas: 3000000
     }).then(function(newContractInstance){
         // 初始化此合约一定的以太币
         web3.eth.sendTransaction({
