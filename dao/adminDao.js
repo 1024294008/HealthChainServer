@@ -2,6 +2,10 @@ var db = require("../db/mysql")
 
 var conn = db.connect()
 
+function closeConn(){
+  db.close(conn);
+}
+
 // {用户信息json}
 function insert(params, callback){
   var sql_insert = "insert into admin set ?"
@@ -131,6 +135,7 @@ function findByConditions(params, callback){
 }
 
 module.exports = {
+  closeConn, // 关闭数据库连接
   insert,
   deleteByPrimaryKey,
   updateByPrimaryKey,

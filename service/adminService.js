@@ -211,6 +211,7 @@ function getAdminList(req, callback){
             // objList._data.dataList.data = re;
             // callback(objList);
             res_json.data = re;
+            dao.adminDao.closeConn();
             callback(res_json);
           }
           else {
@@ -486,7 +487,7 @@ function getLogList(req, callback){
     }
 
     dao.logDao.findByConditionsCount(params, function(status, result){
-      if( 1 === status && result[0]){
+      if( 1 === status){
         // objList._code = "200";
         // objList._msg = "查找成功";
         // objList._data.dataList.count = result[0];
@@ -501,7 +502,7 @@ function getLogList(req, callback){
         res_json.count = result[0].allCount;
 
         dao.logDao.findByConditions(params, function(st, re){
-          if( 1 === st && re[0]){
+          if( 1 === st){
             // objList._data.dataList.data = re;
             // callback(objList);
 
