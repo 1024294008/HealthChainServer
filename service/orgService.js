@@ -78,17 +78,28 @@ function register(req, callback){
 }
 //3更改机构的个人信息
 function updateOrgInfo(req, callback){
-  if(req.body.verify && req.body.verify.id){
+  if(req.body.verify && req.body.verify.id && !req.body.stop){
     //只能修改头像(机构的图片)，机构名，机构简介，机构账号
     if (req.body && req.body.portrait || req.body.organizationName || req.body.introduction) {
       //保存图片到服务器，再将路径记录下来
-      console.log(req.body.portrait)
-      var json_updateOrgInfo = {
-        portrait:req.body.portrait,
-        organizationName:req.body.organizationName,
-        introduction:req.body.introduction,
-        account:req.body.account
+      var json_updateOrgInfo;
+      if (null == req.body.portrait) {
+        //说明没有修改图片
+        json_updateOrgInfo = {
+          organizationName:req.body.organizationName,
+          introduction:req.body.introduction,
+          account:req.body.account
+        }
+      }else{
+        json_updateOrgInfo = {
+          portrait:req.body.portrait,
+          organizationName:req.body.organizationName,
+          introduction:req.body.introduction,
+          account:req.body.account
+        }
       }
+
+      console.log(json_updateOrgInfo)
       dao.orgDao.updateByPrimaryKey([json_updateOrgInfo,req.body.verify.id],function(status, result){
         if (1===status) {
           console.log(result)
