@@ -5,8 +5,7 @@ var service = require('../../service')
 var checkToken = require('../../middleware/checkToken')
 
 router.post('/', checkToken, function(req, res, next){
-  console.log(req.body)
-  service.userService.getHealthData(req, function(result){
+  service.userService.getBalance(req, function(result){
     res.json(result)
   })
 })

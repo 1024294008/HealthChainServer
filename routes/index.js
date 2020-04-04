@@ -9,6 +9,8 @@ module.exports = function(app){
   app.use('/api/user/updateUserInfo', require('./users/updateUserInfo'))
   app.use('/api/user/getServiceList', require('./users/getMedicalServiceList'))
   app.use('/api/user/getHealthData', require('./users/getHealthData'))
+  app.use('/api/user/getBalance', require('./users/getBalance'))
+  app.use('/api/user/getHealthCount', require('./users/getHealthCount'))
 
   /* org路由 */
   app.use('/api/org/login', require('./org/login'))

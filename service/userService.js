@@ -162,15 +162,22 @@ function getMedicalServiceList(req, callback){
 // 获取用户自己的某一条健康数据
 function getHealthData(req, callback){
   if(req.body && req.body.verify){
-    dao.userDao.findByPrimaryKey(req.verify.id, function(status, user){
+    dao.userDao.findByPrimaryKey(req.body.verify.id, function(status, user){
       // 显示最近一条数据
-      if(1 === status && -1 === req.body.index){
-        dao.ethDao.getHealthCount(user.ethAddress, function(status, count){
+      if(1 === status && -1 === parseInt(req.body.index) && user[0]){
+        dao.ethDao.getHealthCount(user[0].contractAddr, function(status, count){
           if(1 === status && count !== 0){
-            dao.ethDao.getHDataByIndex(count - 1, user.ethAddress, user.contractAddr, function(status, result){
+            dao.ethDao.getHDataByIndex(count - 1, user[0].ethAddress, user[0].contractAddr, function(status, result){
               if(1 === status){
                 obj._code = '200'
                 obj._msg = '查询成功'
+                delete result[0]
+                delete result[1]
+                delete result[2]
+                delete result[3]
+                delete result[4]
+                delete result[5]
+                delete result[6]
                 obj._data = result
                 callback(obj)
               } else {
@@ -188,12 +195,19 @@ function getHealthData(req, callback){
           } else {
             obj._code = '201'
             obj._msg = '查询失败'
+            delete result[0]
+            delete result[1]
+            delete result[2]
+            delete result[3]
+            delete result[4]
+            delete result[5]
+            delete result[6]
             obj._data = {}
             callback(obj)
           }
         })
-      } else if(1 === status && req.body.index) {  // 显示某一条数据
-        dao.ethDao.getHDataByIndex(req.body.index, user.ethAddress, user.contractAddr, function(status, result){
+      } else if(1 === status && req.body.index && user[0]) {  // 显示某一条数据
+        dao.ethDao.getHDataByIndex(req.body.index, user[0].ethAddress, user[0].contractAddr, function(status, result){
           if(1 === status){
             obj._code = '200'
             obj._msg = '查询成功'
@@ -230,8 +244,8 @@ function getHealthDataList(req, callback){
 function getHealthCount(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     dao.userDao.findByPrimaryKey(req.body.verify.id, function(status, user){
-      if(1 === status){
-        dao.ethDao.getHealthCount(user.ethAddress, function(status, result){
+      if(1 === status && user[0]){
+        dao.ethDao.getHealthCount(user[0].contractAddr, function(status, result){
           if(1 === status){
             obj._code = '200'
             obj._msg = '查询成功'
@@ -266,8 +280,8 @@ function transfer(req, callback){
 function getBalance(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     dao.userDao.findByPrimaryKey(req.body.verify.id, function(status, user){
-      if(1 === status){
-        dao.ethDao.getBalance(user.ethAddress, function(status, result){
+      if(1 === status && user[0]){
+        dao.ethDao.getBalance(user[0].ethAddress, function(status, result){
           if(1 === status){
             obj._code = '200'
             obj._msg = '查询成功'
@@ -293,9 +307,21 @@ function getBalance(req, callback){
 }
 
 function getBlockInfo(req, callback){
-  if(req.body && req.body.verify && req.body.verify.id){
-    // dao.adminEthDao.
-  } else{
+  if(req.query && req.query.num){
+    dao.adminEthDao.getBlockInfo(req.query.num, function(status, result){
+      if(1 === status){
+        obj._code = '200'
+        obj._msg = '查询成功'
+        obj._data = result
+        callback(obj)
+      } else{
+        obj._code = '201'
+        obj._msg = '查询失败'
+        obj._data = {}
+        callback(obj)
+      }
+    })
+  } else {
     obj._code = '201'
     obj._msg = '查询失败'
     obj._data = {}
@@ -304,7 +330,19 @@ function getBlockInfo(req, callback){
 }
 
 function getMinerInfo(req, callback){
-
+  dao.adminEthDao.getMinerInfo(function(status, result){
+    if(1 === status){
+      obj._code = '200'
+      obj._msg = '查询成功'
+      obj._data = result
+      callback(obj)
+    } else{
+      obj._code = '201'
+      obj._msg = '查询失败'
+      obj._data = {}
+      callback(obj)
+    }
+  })
 }
 
 module.exports = {
@@ -313,5 +351,7 @@ module.exports = {
   getUserInfo,
   updateUserInfo,
   getMedicalServiceList,
-  getHealthData
+  getHealthData,
+  getHealthCount,
+  getBalance
 }
