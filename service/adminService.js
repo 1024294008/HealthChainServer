@@ -1,6 +1,7 @@
 var dao = require('../dao')
 var createToken = require('../middleware/createToken')
 var BigNumber = require("bignumber.js")
+var dateUtil = require('../utils/dateUtil')
 
 var obj = {
   _code: '',
@@ -697,20 +698,28 @@ function deleteUser(req, callback){
 // 查看钱包信息
 function getWalletInfo(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
-    var params = {
-      id: req.body.id
-    }
+    var ethAddress = req.body.ethAddress;
+    console.log(req.body)
+    dao.ethDao.getBalance(ethAddress, function(status, result){
+      if( 1 === status)
+      {
+        obj._code = "200";
+        obj._msg = "余额获取成功";
+        obj._data.getBalance = result[0];
+        callback(obj);
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "余额获取失败..";
+        obj._data = {};
+        callback(obj);
+      }
 
-    dao.ethDao.getBalance(function(status, result){
-      obj._code = "200";
-      obj._msg = "删除成功";
-      obj._data.getBalance = result[0];
-      callback(obj);
     })
   }
   else{
     obj._code = "201";
-    obj._msg = "查看失败..";
+    obj._msg = "余额获取失败..";
     obj._data = {};
     callback(obj);
   }
@@ -721,13 +730,32 @@ function transferToUser(req, callback){
   if(req.body && req.body.verify && req.body.verify.id && req.body.verify.id === 1){
     var receiverEthAddr = req.body.receiverEthAddr;
     var value = new BigNumber(req.body.value);
-
     dao.ethDao.transferToUser(receiverEthAddr, value, function(status){
-      if( 1 === status){
-        obj._code = "200";
-        obj._msg = "转账成功";
-        obj._data = {};
-        callback(obj);
+      if( 1 === sta){
+        var record = {
+          sendAddress: req.body.sendAddress,  // 发送方地址
+          recieveAddress: receiverEthAddr,  // 接收方地址
+          transactEth: value,     // 交易金额
+          transactTime: dateUtil.format(new Date(), '-'),   // 交易时间
+          transactAddr: '',       // 交易地址
+          transactRemarks: req.body.transactRemarks  // 备注
+
+        }
+        dao.transactionrecordDao.insert(record, function(s, r){
+          if( 1 === s){
+            obj._code = "200";
+            obj._msg = "转账成功..记录插入成功..";
+            obj._data = {};
+            callback(obj);
+          }
+          else{
+            obj._code = "201";
+            obj._msg = "交易记录插入失败";
+            obj._data = {};
+            callback(obj);
+          }
+        })
+
       }
       else{
         obj._code = "201";
@@ -739,7 +767,7 @@ function transferToUser(req, callback){
   }
 }
 
-// 管理员向其他用户转账
+// 管理员转账
 function transfer(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     var id = req.body.verify.id
@@ -751,10 +779,31 @@ function transfer(req, callback){
 
         dao.ethDao.transfer(senderPrivateKey, receiverEthAddr, value, function(sta){
           if( 1 === sta){
-            obj._code = "200";
-            obj._msg = "转账成功";
-            obj._data = {};
-            callback(obj);
+
+            var record = {
+              sendAddress: result[0].ethAddress,  // 发送方地址
+              recieveAddress: receiverEthAddr,  // 接收方地址
+              transactEth: value,     // 交易金额
+              transactTime: dateUtil.format(new Date(), '-'),   // 交易时间
+              transactAddr: '',       // 交易地址
+              transactRemarks: req.body.transactRemarks  // 备注
+
+            }
+            dao.transactionrecordDao.insert(record, function(s, r){
+              if( 1 === s){
+                obj._code = "200";
+                obj._msg = "转账成功..记录插入成功..";
+                obj._data = {};
+                callback(obj);
+              }
+              else{
+                obj._code = "201";
+                obj._msg = "交易记录插入失败";
+                obj._data = {};
+                callback(obj);
+              }
+            })
+
           }
           else{
             obj._code = "201";
@@ -771,6 +820,67 @@ function transfer(req, callback){
         callback(obj);
       }
     })
+  }
+}
+
+// 查看交记录
+function transactionRecord(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+    var params = {
+      sendAddress: req.body.sendAddress,       // 发送方是自己
+      recieveAddress: req.body.sendAddress,    // 接受放也是自己
+      transactTime: "",
+      limit: req.body.limit,
+      page: req.body.page
+    }
+
+    dao.transactionrecordDao.findByConditionsCount(params, function(status, result){
+      if( 1=== status && result[0]){
+        // objList._code = "200";
+        // objList._msg = "查找成功";
+        // objList._data.dataList.count = result[0];
+
+        var res_json = {
+          code: 0,
+          msg: '',
+          count: 0,
+          data: []
+        }
+
+        res_json.count = result[0].allCount;
+
+        dao.transactionrecordDao.findByConditions(params, function(st, re){
+          if( 1=== st && re[0]){
+            // objList._data.dataList.data = re;
+            // callback(objList);
+
+            res_json.data = re;
+
+            callback(res_json);
+          }
+          else {
+            obj._code = "201";
+            obj._msg = "查找失败";
+            obj._data = {};
+            callback(obj);
+          }
+        });
+
+      }
+      else {
+        obj._code = "201";
+        obj._msg = "查找失败";
+        obj._data = {};
+        callback(obj);
+      }
+    });
+
+  }
+  else{
+    obj._code = "201";
+    obj._msg = "查找失败..";
+    obj._data = {};
+    callback(obj);
   }
 }
 
@@ -792,5 +902,8 @@ module.exports = {
   updateUserInfo,
   deleteUser,
   getWalletInfo,
-  isSuperAdmin
+  isSuperAdmin,
+  transferToUser,
+  transfer,
+  transactionRecord
 }
