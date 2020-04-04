@@ -31,7 +31,8 @@ function login(req, callback){
         obj._data.token = createToken({id: result[0].id, type: 'admin'})
         delete result[0].privateKey;
         delete result[0].contractAddr;
-        obj._data.adminInfo = result[0];
+        // obj._data.adminInfo = result[0];
+        obj._data.adminInfo = JSON.stringify(result[0])
         callback(obj);
       }
       else{
@@ -51,6 +52,30 @@ function login(req, callback){
   }
 }
 
+// 判断是否是超级管理员
+function isSuperAdmin(req, callback){
+  if(req.body && req.body.verify){
+    dao.adminDao.findByAccount(req.body.account, function(status, result){
+      console.log(result)
+      if( 1 === status && result[0] && result[0].authority === 'root'){
+        obj._code = "200";
+        obj._msg = "超级管理员";
+        obj._data = {};
+        callback(obj);
+      }else{
+        obj._code = "201";
+        obj._msg = "不是超级管理员";
+        obj._data = {};
+        callback(obj);
+      }
+    })
+  }else{
+    obj._code = "201";
+    obj._msg = "不是超级管理员";
+    obj._data = {};
+    callback(obj);
+  }
+}
 // 添加管理员
 function addAdminInfo(req, callback){
   if(req.body && req.body.account && req.body.password && req.body.verify && req.body.verify.id && req.body.verify.id === 1){
@@ -107,7 +132,7 @@ function deleteAdmin(req, callback){
   if(req.body && req.body.verify && req.body.verify.id && req.body.id && req.body.verify.id === 1){
     var params = req.body.id
     dao.adminDao.deleteByPrimaryKey(params, function(status, result){
-      if( 1 === status && result[0]){
+      if( 1 === status ){
         obj._code = "200";
         obj._msg = "删除成功";
         obj._data = {};
@@ -115,7 +140,7 @@ function deleteAdmin(req, callback){
       }
       else{
         obj._code = "201";
-        obj._msg = "删除失败";
+        obj._msg = "删除失败了吗";
         obj._data = {};
         callback(obj);
       }
@@ -129,12 +154,14 @@ function updateAdmin(req, callback){
   if(req.body && req.body.password && req.body.verify && req.body.verify.id && req.body.id &&  req.body.verify.id === 1){
     var admin = {
       password: req.body.password,
+      authority: req.body.authority,
+      account:req.body.account
     }
 
     var id = req.body.id;
 
     dao.adminDao.updateByPrimaryKey([admin, id], function(status, result){
-      if( 1 === status && result[0]){
+      if( 1 === status ){
         obj._code = "200";
         obj._msg = "修改成功";
         obj._data = {};
@@ -305,6 +332,34 @@ function delOrgInfo(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     var id = req.body.id;
     dao.orgDao.deleteByPrimaryKey([id], function(status, result){  // 这里的参数要给成[]
+      if( 1 === status){
+        obj._code = "200";
+        obj._msg = "删除成功";
+        obj._data = {};
+        callback(obj);
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "删除失败..";
+        obj._data = {};
+        callback(obj);
+      }
+    })
+  }
+  else{
+    obj._code = "201";
+    obj._msg = "删除失败..";
+    obj._data = {};
+    callback(obj);
+  }
+}
+
+// 删除医疗服务
+function deleteMedicalService(req, callback){
+  console.log("删除医疗服务~~");
+  if(req.body && req.body.verify && req.body.verify.id){
+    var id = req.body.id;
+    dao.medicalServiceDao.deleteByPrimaryKey(id, function(status, result){
       if( 1 === status){
         obj._code = "200";
         obj._msg = "删除成功";
@@ -508,6 +563,7 @@ function getUserList(req, callback){
             // callback(objList);
 
             res_json.data = re;
+
             callback(res_json);
           }
           else {
@@ -570,6 +626,9 @@ function updateUserInfo(req, callback){
       password: req.body.password
     }
     var id = req.body.id;
+
+    console.log([params, id]);
+
     dao.userDao.updateByPrimaryKey([params, id], function(status, result){
       if( 1 === status){
         obj._code = "200";
@@ -592,6 +651,7 @@ function updateUserInfo(req, callback){
     callback(obj);
   }
 }
+
 
 // 删除用户信息
 function deleteUser(req, callback){
@@ -661,6 +721,7 @@ module.exports = {
   getOrgInfoList,
   updateOrgInfo,
   delOrgInfo,
+  deleteMedicalService,
   findMedicalServiceList,
   updateMedicalServcie,
   getLogList,
@@ -668,5 +729,6 @@ module.exports = {
   findUserInfo,
   updateUserInfo,
   deleteUser,
-  getWalletInfo
+  getWalletInfo,
+  isSuperAdmin
 }

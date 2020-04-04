@@ -22,8 +22,8 @@ function deleteByPrimaryKey(params, callback){
       callback(0)
       return;
      }
-     console.log("删除成功~")
-     callback(1)
+     console.log("删除成功~");
+     callback(1);
   })
 }
 
