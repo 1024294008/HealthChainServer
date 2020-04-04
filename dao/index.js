@@ -16,4 +16,6 @@ exports.transactionrecordDao = transactionrecordDao
 exports.userDao = userDao
 exports.medicalServiceDao = medicalServiceDao
 exports.orgDao = orgDao
+exports.ethDao = ethDao
+exports.adminEthDao = adminEthDao
 // exports.visitorrecordDao = visitorrecordDao
