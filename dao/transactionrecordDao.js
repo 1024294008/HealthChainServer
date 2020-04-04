@@ -55,7 +55,7 @@ function findByConditionsCount(params, callback){
     sql_select_count += 'and sendAddress = ' + '\"'  + params.sendAddress + '\" ' // 字符串拼接需要引号，注意末尾空格
 
   if(params.recieveAddress != "" && params.recieveAddress != null)
-    sql_select_count += 'and recieveAddress = ' + '\"'  + params.recieveAddress + '\" ' // 字符串拼接需要引号，注意末尾空格
+    sql_select_count += 'or recieveAddress = ' + '\"'  + params.recieveAddress + '\" ' // 字符串拼接需要引号，注意末尾空格
 
   if(params.transactTime != "" && params.transactTime != null)
     sql_select_count += 'and transactTime = ' + '\"'  + params.transactTime + '\" ' // 字符串拼接需要引号，注意末尾空格
@@ -104,5 +104,6 @@ module.exports = {
   insert,
   deleteByPrimaryKey,
   findByPrimaryKey,
+  findByConditionsCount,
   findByConditions
 }

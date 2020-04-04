@@ -10,6 +10,9 @@ var orgDao = require('./orgDao')
 var ethDao = require('./ethDao')
 var adminEthDao = require('./adminEthDao')
 // var visitorrecordDao = require('./visitorrecordDao')
+var ethDao = require('./ethDao')
+var adminEthDao = require('./adminEthDao')
+
 
 exports.adminDao = adminDao
 exports.logDao = logDao
@@ -21,3 +24,5 @@ exports.orgDao = orgDao
 exports.ethDao = ethDao
 exports.adminEthDao = adminEthDao
 // exports.visitorrecordDao = visitorrecordDao
+exports.ethDao = ethDao
+exports.adminEthDao = adminEthDao

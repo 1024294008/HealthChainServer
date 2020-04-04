@@ -1,5 +1,6 @@
 var dao = require('../dao')
 var BigNumber = require("bignumber.js")
+var dateUtil = require('../utils/dateUtil')
 var obj = {
   _code: "",
   _msg: "",
@@ -68,8 +69,8 @@ function uploadOrgHealthData(req, callback){
           "sleepQuality": req.body.sleepQuality,
           "distance": req.body.distance,
           "evaluation": req.body.evaluation,
-          "uploadTime": "2020-4-4",
-          "permitVisit": req.body.permitVisit
+          "uploadTime": dateUtil.format(new Date(), '-'),
+          "permitVisit": parseInt(req.body.permitVisit)
         }
         var privateKey = result[0].privateKey
         var contractAddr = result[0].contractAddr
@@ -115,7 +116,7 @@ function uploadUserHealthData(req, callback){
           "sleepQuality": req.body.sleepQuality,
           "distance": req.body.distance,
           "evaluation": req.body.evaluation,
-          "uploadTime": "2020-4-4",
+          "uploadTime": dateUtil.format(new Date(), '-'),
           "permitVisit": parseInt(req.body.permitVisit)
         }
         var privateKey = result1[0].privateKey
@@ -148,62 +149,119 @@ function uploadUserHealthData(req, callback){
     callback(obj)
   }
 }
-// // 转账
-// function transfer(req, callback){
-//   console.log(req.body.verify)
-//   if(req.body.verify && req.body.verify.id){
-//     // 获取发送方私钥
-//     dao.userDao.findByPrimaryKey(req.body.verify.id,function(status1, result1){
-//       if( 1 === status1 && result1[0]){
-//         //获取接收方地址
-//         dao.userDao.findByAccount(req.body.receiveAccount, function(status2, result2){
-//           if(1 === status2 && result2[0]){
-//             // 发送方私钥， 接收方以太坊地址, 转账金额
-//             dao.ethDao.transfer(result1[0].privateKey, result2[0].ethAddress, new BigNumber(req.body.value), function(status3, result3){
-//               if(1 === status3){
-//                 obj._code = '200'
-//                 obj._msg = '转账成功'
-//                 obj._data = {}
-//                 callback(obj)
-//                 // 将交易记录存到数据库
-//                 var record = {
-//                   "sendAddress": result1[0].ethAddress,
-//                   "receiveAddress": result2[0].ethAddress,
-//                   "transactEth": req.body.value,
-//                   "transactTime": "2020-4-4",
 
+// 用户向别人转账
+function transferFromUser(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+    var id = req.body.verify.id
+    dao.userDao.findByPrimaryKey(id, function(status, result){
+      if( 1 === status && result[0]){
+        console.log(result[0])
+        var senderPrivateKey = result[0].privateKey;
+        var receiverEthAddr = req.body.receiverEthAddr;
+        var value = new BigNumber(req.body.value);
 
-//                 }
-//               }else{
-//                 obj._code = '201'
-//                 obj._msg = '转账失败'
-//                 obj._data = {}
-//                 callback(obj)
-//               }
-//             })
-//           }else{
-//             obj._code = '201'
-//             obj._msg = '转账失败'
-//             obj._data = {}
-//             callback(obj)
-//           }
-//         })
-//       }else{
-//         obj._code = '201'
-//         obj._msg = '转账失败'
-//         obj._data = {}
-//         callback(obj)
-//       }
-//     })
-//   }else{
+        dao.ethDao.transfer(senderPrivateKey, receiverEthAddr, value, function(sta){
+          if( 1 === sta){
 
-//     obj._code = '201'
-//     obj._msg = '转账失败'
-//     obj._data = {}
-//     callback(obj)
-//   }
-// }
+            var record = {
+              sendAddress: result[0].ethAddress,  // 发送方地址
+              recieveAddress: receiverEthAddr,  // 接收方地址
+              transactEth: value,     // 交易金额
+              transactTime: dateUtil.format(new Date(), '-'),   // 交易时间
+              transactAddr: '',       // 交易地址
+              transactRemarks: req.body.transactRemarks  // 备注
 
+            }
+            dao.transactionrecordDao.insert(record, function(s, r){
+              if( 1 === s){
+                obj._code = "200";
+                obj._msg = "转账成功..记录插入成功..";
+                obj._data = {};
+                callback(obj);
+              }
+              else{
+                obj._code = "201";
+                obj._msg = "交易记录插入失败";
+                obj._data = {};
+                callback(obj);
+              }
+            })
+
+          }
+          else{
+            obj._code = "201";
+            obj._msg = "转账失败..";
+            obj._data = {};
+            callback(obj);
+          }
+        })
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "转账用户不存在..";
+        obj._data = {};
+        callback(obj);
+      }
+    })
+  }
+}
+
+// 机构向别人转账
+function transferFromOrg(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+    var id = req.body.verify.id
+    dao.orgDao.findByPrimaryKey(id, function(status, result){
+      if( 1 === status && result[0]){
+        var senderPrivateKey = result[0].privateKey;
+        var receiverEthAddr = req.body.receiverEthAddr;
+        var value = new BigNumber(req.body.value);
+
+        dao.ethDao.transfer(senderPrivateKey, receiverEthAddr, value, function(sta){
+          if( 1 === sta){
+
+            var record = {
+              sendAddress: result[0].ethAddress,  // 发送方地址
+              recieveAddress: receiverEthAddr,  // 接收方地址
+              transactEth: value,     // 交易金额
+              transactTime: dateUtil.format(new Date(), '-'),   // 交易时间
+              transactAddr: '',       // 交易地址
+              transactRemarks: req.body.transactRemarks  // 备注
+
+            }
+            dao.transactionrecordDao.insert(record, function(s, r){
+              if( 1 === s){
+                obj._code = "200";
+                obj._msg = "转账成功..记录插入成功..";
+                obj._data = {};
+                callback(obj);
+              }
+              else{
+                obj._code = "201";
+                obj._msg = "交易记录插入失败";
+                obj._data = {};
+                callback(obj);
+              }
+            })
+
+          }
+          else{
+            obj._code = "201";
+            obj._msg = "转账失败..";
+            obj._data = {};
+            callback(obj);
+          }
+        })
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "转账用户不存在..";
+        obj._data = {};
+        callback(obj);
+      }
+    })
+  }
+}
 // 获取服务详情和对应的机构信息
 function getServiceAndOrg(req, callback){
   if(req.query && req.query.id){
@@ -232,6 +290,7 @@ module.exports = {
   getMedicalServiceInfo,
   getServiceAndOrg,
   uploadOrgHealthData,
-  uploadUserHealthData
-  // transfer,
+  uploadUserHealthData,
+  transferFromUser,
+  transferFromOrg
 }
