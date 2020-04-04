@@ -101,6 +101,53 @@ function uploadOrgHealthData(req, callback){
   }
 }
 
+// 用户上传健康数据
+function uploadUserHealthData(req, callback){
+  console.log(req.body)
+  if(req.body && req.body.verify && req.body.verify.id && req.body.heartRate && req.body.heat && req.body.sleepQuality && req.body.distance && req.body.evaluation && req.body.permitVisit){
+    // 查找用户的私钥和合约地址
+    dao.userDao.findByPrimaryKey(req.body.verify.id, function(status1, result1){
+      // console.log(result1[0])
+      if( 1 === status1 && result1[0]){
+        var healthData = {
+          "heartRate": req.body.heartRate,
+          "heat": req.body.heat,
+          "sleepQuality": req.body.sleepQuality,
+          "distance": req.body.distance,
+          "evaluation": req.body.evaluation,
+          "uploadTime": "2020-4-4",
+          "permitVisit": parseInt(req.body.permitVisit)
+        }
+        var privateKey = result1[0].privateKey
+        var contractAddr = result1[0].contractAddr
+        dao.ethDao.addData(healthData, privateKey, contractAddr, function(status2, result2){
+          console.log(status2)
+          if(1 === status2){
+            obj._code = '200'
+            obj._msg = '上传成功'
+            obj._data = {}
+            callback(obj)
+          }else{
+            obj._code = '201'
+            obj._msg = '上传失败'
+            obj._data = {}
+            callback(obj)
+          }
+        })
+      }else{
+        obj._code = '201'
+        obj._msg = '上传失败'
+        obj._data = {}
+        callback(obj)
+      }
+    })
+  }else{
+    obj._code = '201'
+    obj._msg = '上传失败'
+    obj._data = {}
+    callback(obj)
+  }
+}
 // // 转账
 // function transfer(req, callback){
 //   console.log(req.body.verify)
@@ -184,6 +231,7 @@ module.exports = {
   getOrgInfo,
   getMedicalServiceInfo,
   getServiceAndOrg,
-  uploadOrgHealthData
+  uploadOrgHealthData,
+  uploadUserHealthData
   // transfer,
 }
