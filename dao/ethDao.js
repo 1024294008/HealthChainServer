@@ -178,4 +178,3 @@ module.exports = {
     transfer,
     getBalance
 }
-
