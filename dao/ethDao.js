@@ -179,3 +179,23 @@ module.exports = {
     getBalance
 }
 
+var healthData = {
+  "heartRate": "75",
+  "heat": "36",
+  "sleepQuality": "健康",
+  "distance": "10000",
+  "evaluation": "很好",
+  "uploadTime": "2020-4-4",
+  "permitVisit": 1
+}
+
+var privateKey = "0x605d039b7bc1719c7461c4c2225d58d900f9d55b185118ad5564a473567311b2"
+var contractAddr = "0x3cf9dC5bED6Abf7c99897495F753C6FC99f7671C"
+addData(healthData, privateKey, contractAddr, function(status, result){
+  if(1 === status){
+    console.log("成功啦")
+  }
+  else{
+    console.log("哎呀,失败了")
+  }
+})
