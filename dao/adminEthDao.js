@@ -119,8 +119,3 @@ module.exports = {
     getBlockHeight,
     getBlockInfo
 }
-
-getAdminAddress(function(status, result){
-    console.log(status)
-    console.log(result)
-})

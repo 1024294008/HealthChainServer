@@ -175,6 +175,7 @@ module.exports = {
     getAuthInfo,
     getHDataByIndex,
     transferToUser,
-    transfer
+    transfer,
+    getBalance
 }
 
