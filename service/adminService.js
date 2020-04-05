@@ -34,6 +34,7 @@ function login(req, callback){
         delete result[0].privateKey;
         delete result[0].contractAddr;
         // obj._data.adminInfo = result[0];
+
         obj._data.adminInfo = JSON.stringify(result[0])
         callback(obj);
       }
@@ -81,6 +82,7 @@ function isSuperAdmin(req, callback){
 
 // 添加管理员
 function addAdminInfo(req, callback){
+  console.log(req.body)
   if(req.body && req.body.account && req.body.password && req.body.verify && req.body.verify.id && req.body.verify.id === 1){
 
     var admin = {
@@ -104,8 +106,8 @@ function addAdminInfo(req, callback){
 
         dao.ethDao.createAccout(function(sta, res){
           if( 1 === sta){
-            admin.ethAddress = res.privateKey;
-            admin.privateKey = res.ethAddress;
+            admin.ethAddress = res.ethAddress;
+            admin.privateKey = res.privateKey;
             admin.contractAddr = res.contractAddr
 
             dao.adminDao.insert(admin, function(st, re){
@@ -225,7 +227,6 @@ function getAdminList(req, callback){
             // objList._data.dataList.data = re;
             // callback(objList);
             res_json.data = re;
-            dao.adminDao.closeConn();
             callback(res_json);
           }
           else {
@@ -699,13 +700,12 @@ function deleteUser(req, callback){
 function getWalletInfo(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     var ethAddress = req.body.ethAddress;
-    console.log(req.body)
     dao.ethDao.getBalance(ethAddress, function(status, result){
       if( 1 === status)
       {
         obj._code = "200";
         obj._msg = "余额获取成功";
-        obj._data.getBalance = result[0];
+        obj._data.balance = result;
         callback(obj);
       }
       else{
@@ -771,15 +771,17 @@ function transferToUser(req, callback){
 function transfer(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     var id = req.body.verify.id
+
     dao.adminDao.findByPrimaryKey(id, function(status, result){
+
       if( 1 === status && result[0]){
         var senderPrivateKey = result[0].privateKey;
         var receiverEthAddr = req.body.receiverEthAddr;
         var value = new BigNumber(req.body.value);
 
         dao.ethDao.transfer(senderPrivateKey, receiverEthAddr, value, function(sta){
+          console.log("进入到转账函数.." + sta)
           if( 1 === sta){
-
             var record = {
               sendAddress: result[0].ethAddress,  // 发送方地址
               recieveAddress: receiverEthAddr,  // 接收方地址
@@ -787,8 +789,8 @@ function transfer(req, callback){
               transactTime: dateUtil.format(new Date(), '-'),   // 交易时间
               transactAddr: '',       // 交易地址
               transactRemarks: req.body.transactRemarks  // 备注
-
             }
+
             dao.transactionrecordDao.insert(record, function(s, r){
               if( 1 === s){
                 obj._code = "200";

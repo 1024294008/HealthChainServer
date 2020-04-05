@@ -2,9 +2,6 @@ var db = require("../db/mysql")
 
 var conn = db.connect()
 
-function closeConn(){
-  db.close(conn);
-}
 
 // {用户信息json}
 function insert(params, callback){
@@ -50,6 +47,7 @@ function updateByPrimaryKey(params, callback){
 // 参数 id
 function findByPrimaryKey(params, callback){
   var sql_select = "select * from admin where id = ?"
+  console.log(sql_select)
   conn.query(sql_select, [params], function(err, res){
     if(err){
       console.log('[FIND ERROR] - ',err.message);
@@ -135,7 +133,6 @@ function findByConditions(params, callback){
 }
 
 module.exports = {
-  closeConn, // 关闭数据库连接
   insert,
   deleteByPrimaryKey,
   updateByPrimaryKey,
