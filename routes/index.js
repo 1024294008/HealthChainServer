@@ -50,6 +50,9 @@ module.exports = function(app){
   /* common路由 */
   app.use('/api/common/getOrgInfo', require('./common/getOrgInfo'))
   app.use('/api/common/getMedicalServiceInfo', require('./common/getMedicalServiceInfo'))
-  app.use('/api/common/transfer', require('./common/transfer'))
+  app.use('/api/common/transferFromUser', require('./common/transferFromUser'))
+  app.use('/api/common/transferFromOrg', require('./common/transferFromOrg'))
   app.use('/api/common/getServiceAndOrg', require('./common/getServiceAndOrg'))
+  app.use('/api/common/uploadOrgHealthData', require('./common/uploadOrgHealthData'))
+  app.use('/api/common/uploadUserHealthData', require('./common/uploadUserHealthData'))
 }
