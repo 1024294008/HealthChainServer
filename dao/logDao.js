@@ -12,7 +12,7 @@ function insert(params, callback){
       return;
     }
     console.log("插入成功~");
-    callback(1);
+    callback(1, res);
   })
 }
 
@@ -87,3 +87,18 @@ module.exports = {
   findByConditionsCount,
   findByConditions
 }
+
+// param = {
+
+//   operateId: "1",
+//   operateDetails: "添加用户",
+//   operateTime: "2018-1-5",
+//   operateResult: "success",
+
+
+// }
+
+// insert(param, function(status, result){
+//   console.log(status);
+//   console.log(result);
+// })
