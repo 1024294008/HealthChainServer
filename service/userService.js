@@ -1,5 +1,6 @@
 var dao = require('../dao')
 var createToken = require('../middleware/createToken')
+var HealthDataList = require('../models/HealthDataList')
 
 var obj = {
   _code: '',
@@ -237,7 +238,61 @@ function getHealthData(req, callback){
 
 // 获取用户自己的全部健康数据
 function getHealthDataList(req, callback){
-
+  if(req.body && req.body.verify && req.body.verify.id){
+    dao.userDao.findByPrimaryKey(req.body.verify.id, function(status, user){
+      if(1 === status && user[0]){
+        dao.ethDao.getHealthCount(user[0].contractAddr, function(status, count){
+          if(1 === status && 0 !== count){
+            var healthDataList = new HealthDataList(count)
+            healthDataList.on('dataAccepted', function(list){   // 当监听接收的数据量达到count时(或者超时)触发此事件
+              obj._code = '200'
+              obj._msg = '查询成功'
+              obj._data = list
+              callback(obj)
+            })
+            for(var i = 0; i < count; i ++){
+              (function(i){                   // 闭包
+                dao.ethDao.getHDataByIndex(i, user[0].ethAddress, user[0].contractAddr, function(status, result){
+                  if(1 === status){
+                    // 去掉冗余的字段
+                    delete result[0]
+                    delete result[1]
+                    delete result[2]
+                    delete result[3]
+                    delete result[4]
+                    delete result[5]
+                    delete result[6]
+                    result['index'] = i
+                    healthDataList.addHealthData(result)
+                  }
+                })
+              })(i)
+            }
+          } else if(1 === status && 0 === count){
+            obj._code = '202'
+            obj._msg = '无数据'
+            obj._data = {}
+            callback(obj)
+          } else {
+            obj._code = '201'
+            obj._msg = '查询失败'
+            obj._data = {}
+            callback(obj)
+          }
+        })
+      } else {
+        obj._code = '201'
+        obj._msg = '查询失败'
+        obj._data = {}
+        callback(obj)
+      }
+    })
+  } else {
+    obj._code = '201'
+    obj._msg = '查询失败'
+    obj._data = {}
+    callback(obj)
+  }
 }
 
 // 获取用户自己的健康数据条数
@@ -273,7 +328,58 @@ function getHealthCount(req, callback){
 // 用户转账
 function transfer(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
+    var id = req.body.verify.id
 
+    dao.userDao.findByPrimaryKey(id, function(status, result){
+
+      if( 1 === status && result[0]){
+        var senderPrivateKey = result[0].privateKey;
+        var receiverEthAddr = req.body.receiverEthAddr;
+        var value = new BigNumber(req.body.value);
+
+        dao.ethDao.transfer(senderPrivateKey, receiverEthAddr, value, function(sta){
+          console.log("进入到转账函数.." + sta)
+          if( 1 === sta){
+            var record = {
+              sendAddress: result[0].ethAddress,  // 发送方地址
+              recieveAddress: receiverEthAddr,  // 接收方地址
+              transactEth: value,     // 交易金额
+              transactTime: dateUtil.format(new Date(), '-'),   // 交易时间
+              transactAddr: '',       // 交易地址
+              transactRemarks: req.body.transactRemarks  // 备注
+            }
+
+            dao.transactionrecordDao.insert(record, function(s, r){
+              if( 1 === s){
+                obj._code = "200";
+                obj._msg = "转账成功..记录插入成功..";
+                obj._data = {};
+                callback(obj);
+              }
+              else{
+                obj._code = "201";
+                obj._msg = "交易记录插入失败";
+                obj._data = {};
+                callback(obj);
+              }
+            })
+
+          }
+          else{
+            obj._code = "201";
+            obj._msg = "转账失败..";
+            obj._data = {};
+            callback(obj);
+          }
+        })
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "转账用户不存在..";
+        obj._data = {};
+        callback(obj);
+      }
+    })
   }
 }
 
@@ -352,6 +458,8 @@ module.exports = {
   updateUserInfo,
   getMedicalServiceList,
   getHealthData,
+  getHealthDataList,
   getHealthCount,
+  transfer,
   getBalance
 }
