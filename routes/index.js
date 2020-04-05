@@ -22,6 +22,9 @@ module.exports = function(app){
   app.use('/api/org/updateMedicalService', require('./org/updateMedicalService'))
   app.use('/api/org/updateOrgInfo', require('./org/updateOrgInfo'))
   app.use('/api/org/updatePassword', require('./org/updatePassword'))
+  app.use('/api/org/transfer', require('./org/transfer'))
+  app.use('/api/org/getBalance', require('./org/getBalance'))
+  app.use('/api/org/getAllUsers', require('./org/getAllUsers'))
 
   /* admin路由 */
   app.use('/api/admin/login', require('./admin/login'))

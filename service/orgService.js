@@ -1,6 +1,7 @@
 var dao = require('../dao')
 var createToken = require('../middleware/createToken')
-
+var BigNumber = require("bignumber.js")
+var dateUtil = require('../utils/dateUtil')
 var obj = {
   _code: '',
   _msg: '',
@@ -51,81 +52,86 @@ function register(req, callback){
         callback(obj)
       }else{
         //账户不存在，注册！
-        req.body.ethAddress = '0x79dE40505C7518e0283E6c4f01067b9da35d81d4';
-        req.body.privateKey = '0x08cEsdjkfsjdfjksldk849394j34jk34hj344j3k';
-        req.body.certificateResult = '未审核';
-        req.body.type = "其他";//默认是其他账户类型，认证通过才会变更类型为可提供服务的医疗机构类型
-        req.body.contractAddr = "0x08cEsdjkfsjdfjksldk849394j34jk34hj344j3k";//账户合约部署地址
+        dao.ethDao.createAccout(function(sta, res){
+          if( 1 === sta){
+            req.body.ethAddress = res.ethAddress;
+            req.body.privateKey = res.privateKey;
+            req.body.certificateResult = '未上传';
+            req.body.type = "普通";//默认是其他账户类型，认证通过才会变更类型为可提供服务的医疗机构类型
+            req.body.contractAddr = res.contractAddr;//账户合约部署地址
 
-        dao.orgDao.insert(req.body,function(status, result){
-          if(1===status){
-            //注册成功
-            obj._code = '200'
-            obj._msg = '注册成功，可以登录啦！'
-            obj._data = {}
-            callback(obj)
+            dao.orgDao.insert(req.body,function(status, result){
+              if(1===status){
+                //注册成功
+                obj._code = '200'
+                obj._msg = '注册成功，可以登录啦！'
+                obj._data = {}
+                callback(obj)
+              }else{
+                //注册过程出现失败
+                obj._code = '201'
+                obj._msg = '注册失败，请重试！'
+                obj._data = {}
+                callback(obj)
+              }
+            })
           }else{
             //注册过程出现失败
             obj._code = '201'
-            obj._msg = '注册失败，请重试！'
+            obj._msg = '以太网连接错误导致注册失败，请重试！'
             obj._data = {}
             callback(obj)
           }
         })
+
       }
     })
   }
 }
 //3更改机构的个人信息
 function updateOrgInfo(req, callback){
-  if(req.body.verify && req.body.verify.id){
-    //只能修改头像(机构的图片)，机构名，机构简介
-    if (req.body && req.body.portrait || req.body.organizationName || req.body.introductions) {
+  if(req.body.verify && req.body.verify.id && req.body.stop=="1"){
+    //只能修改头像(机构的图片)，机构名，机构简介，机构账号
+    if (req.body && req.body.portrait || req.body.organizationName || req.body.introduction) {
       //保存图片到服务器，再将路径记录下来
-
-
-
-
-      if(req.body.organizationName){
-        //把主键放进body
-        req.body.id = req.body.verify.id;
-        dao.orgDao.updateByPrimaryKey(req.body,function(status, result){
-          if (1===status) {
-            console.log(result)
-            //说明修改成功
-            obj._code = '200'
-            obj._msg = '信息更新成功！'
-            obj._data = {}
-            callback(obj)
-          }else{
-            obj._code = '201'
-            obj._msg = '账户名重复，请重新命名哦~'
-            obj._data = {}
-            callback(obj)
-          }
-        })
+      var json_updateOrgInfo;
+      if (null == req.body.portrait) {
+        //说明没有修改图片
+        json_updateOrgInfo = {
+          organizationName:req.body.organizationName,
+          introduction:req.body.introduction,
+          account:req.body.account
+        }
+      }else{
+        json_updateOrgInfo = {
+          portrait:req.body.portrait,
+          organizationName:req.body.organizationName,
+          introduction:req.body.introduction,
+          account:req.body.account
+        }
       }
-      if(req.body.introductions){
-        //把主键放进body
 
-        dao.orgDao.updateByPrimaryKey(req.body,function(status, result){
-          if (1===status) {
-            console.log(result)
-            //说明修改成功
-            obj._code = '200'
-            obj._msg = '信息更新成功！'
-            obj._data = {}
-            callback(obj)
-          }else{
-            obj._code = '201'
-            obj._msg = '修改失败，请重试哦~'
-            obj._data = {}
-            callback(obj)
-          }
-        })
-      }
+      console.log(json_updateOrgInfo)
+      dao.orgDao.updateByPrimaryKey([json_updateOrgInfo,req.body.verify.id],function(status, result){
+        if (1===status) {
+          console.log(result)
+          //说明修改成功
+          obj._code = '200'
+          obj._msg = '信息更新成功！'
+          obj._data = {}
+          callback(obj)
+        }else{
+          obj._code = '201'
+          obj._msg = '修改失败，请重试哦~'
+          obj._data = {}
+          callback(obj)
+        }
+      })
     } else {
-
+      obj._code = '201'
+      obj._msg = '信息不符合规范！'
+      obj._data = {}
+      callback(obj)
     }
   }
 }
@@ -243,7 +249,7 @@ function delMedicalService(req,callback){
 //8
 function buyHealthData(req,callback){
   if(req.body && req.body.verify && req.body.verify.id){
-    //从链上查看用户的购买剩余次数，扣除次数后进行下一步
+    //
 
 
     //按照上传时间降序查看，注意只取到允许授权的
@@ -267,13 +273,18 @@ function buyHealthData(req,callback){
 //9
 function audit(req,callback){
   if(req.body && req.body.verify && req.body.verify.id){
-    //拿到审核材料存到服务器本地，将路径存到数据库
-    var fileAddr = "";
-
-
-
-
-    dao.orgDao.updateByPrimaryKey('',function(status,result){
+    //审核材料已经在路由层存到服务器本地，此时只需将路径存到数据库
+    var date = new Date(Date.now());
+    var Y = date.getFullYear() + '/';
+    var M = (date.getMonth()+1 < 10 ? (date.getMonth()+1) : date.getMonth()+1) + '/';
+    var D = date.getDate();
+    var auditTime = Y+M+D
+    var json_audit = {
+      certificateFiles:req.body.fileName,
+      certificateTime:auditTime,
+      certificateResult:"审核中"
+    }
+    dao.orgDao.updateByPrimaryKey([json_audit, req.body.verify.id],function(status,result){
       if (1 == status) {
         obj._code = '200'
         obj._msg = '上传审核材料成功'
@@ -350,6 +361,133 @@ function updatePassword(req,callback){
     })
   }
 }
+//12转账
+function transfer(req,callback){
+  console.log(req.body.receiverEthAddr+":"+req.body.value+":"+req.body.transactRemarks)
+  if(req.body && req.body.verify && req.body.verify.id && req.body.receiverEthAddr && req.body.value){
+    dao.orgDao.findByPrimaryKey(req.body.verify.id, function(status, result){
+      if( 1 === status && result[0]){
+        var senderPrivateKey = result[0].privateKey;
+        var receiverEthAddr = req.body.receiverEthAddr;
+        var value = new BigNumber(req.body.value);
+
+        dao.ethDao.transfer(senderPrivateKey, receiverEthAddr, value, function(sta){
+          console.log("进入到转账函数.." + sta)
+          if( 1 === sta){
+            var record = {
+              sendAddress: result[0].ethAddress,  // 发送方地址
+              recieveAddress: receiverEthAddr,  // 接收方地址
+              transactEth: value,     // 交易金额
+              transactTime: dateUtil.format(new Date(), '-'),   // 交易时间
+              transactAddr: '',       // 交易地址
+              transactRemarks: req.body.transactRemarks  // 备注
+            }
+
+            dao.transactionrecordDao.insert(record, function(s, r){
+              if( 1 === s){
+                obj._code = "200";
+                obj._msg = "转账成功..记录插入成功..";
+                obj._data = {};
+                callback(obj);
+              }
+              else{
+                obj._code = "201";
+                obj._msg = "交易记录插入失败";
+                obj._data = {};
+                callback(obj);
+              }
+            })
+
+          }
+          else{
+            obj._code = "201";
+            obj._msg = "转账失败..";
+            obj._data = {};
+            callback(obj);
+          }
+        })
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "转账用户不存在..";
+        obj._data = {};
+        callback(obj);
+      }
+    })
+  }
+}
+//13 getBalance获取余额
+function getBalance(req,callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+
+    var ethAddress = req.body.ethAddress;
+    console.log(ethAddress)
+    dao.ethDao.getBalance(ethAddress, function(status, result){
+      console.log(result)
+      if( 1 === status)
+      {
+        obj._code = "200";
+        obj._msg = "余额获取成功";
+        obj._data.balance = result;
+        callback(obj);
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "余额获取失败..";
+        obj._data = {};
+        callback(obj);
+      }
+
+    })
+  }
+  else{
+    obj._code = "201";
+    obj._msg = "余额获取失败..";
+    obj._data = {};
+    callback(obj);
+  }
+}
+//14 取得用户列表，判断每一个用户的授权信息
+function getAllUsers(req,callback){
+  if(req.body.verify && req.body.verify.id){
+    var json_getAllUsers = {
+      "id":req.body.verify.id,
+      "page":req.body.page,
+      "limit":req.body.limit
+    }
+    dao.userDao.findByConditionsCount(json_getAllUsers,function(status1,result1){
+      if (1===status1) {
+        //说明获取到了总数,继续获取分页数据
+        var allCount = result1[0].allCount;
+
+        dao.userDao.findByConditions(json_getAllUsers,function(status2,result2){
+          if (1===status2) {
+            //说明获取成功
+            var jsonResult = {
+              code:0,
+              msg:'',
+              count:allCount,
+              data:result2
+            }
+            callback(jsonResult)
+          }else{
+            obj._code = '201'
+            obj._msg = '获取数据失败'
+            obj._data = {}
+            callback(obj)
+          }
+        })
+      }else{
+        obj._code = '201'
+        obj._msg = '出错了，请重试哦~'
+        obj._data = {}
+        callback(obj)
+        return;
+      }
+    });
+
+  }
+}
 module.exports = {
   login,
   register,
@@ -361,5 +499,8 @@ module.exports = {
   buyHealthData,
   audit,
   getMyInfo,
-  updatePassword
+  updatePassword,
+  transfer,
+  getBalance,
+  getAllUsers
 }
