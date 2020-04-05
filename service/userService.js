@@ -16,6 +16,7 @@ function login(req, callback){
       if(1 === status && result[0] && result[0].password === req.body.password){
         obj._code = '200'
         obj._msg = '登录成功'
+        obj._data = {}
         obj._data.token = createToken({id: result[0].id, type: 'user'})
         delete result[0].privateKey
         delete result[0].contractAddr

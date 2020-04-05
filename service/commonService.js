@@ -103,8 +103,7 @@ function uploadOrgHealthData(req, callback){
 
 // 用户上传健康数据
 function uploadUserHealthData(req, callback){
-  console.log(req.body)
-  if(req.body && req.body.verify && req.body.verify.id && req.body.heartRate && req.body.heat && req.body.sleepQuality && req.body.distance && req.body.evaluation && req.body.permitVisit){
+  if(req.body && req.body.verify && req.body.verify.id && req.body.heartRate && req.body.heat && req.body.sleepQuality && req.body.distance && req.body.evaluation && req.body.permitVisit && req.body.uploadTime){
     // 查找用户的私钥和合约地址
     dao.userDao.findByPrimaryKey(req.body.verify.id, function(status1, result1){
       // console.log(result1[0])
@@ -115,7 +114,7 @@ function uploadUserHealthData(req, callback){
           "sleepQuality": req.body.sleepQuality,
           "distance": req.body.distance,
           "evaluation": req.body.evaluation,
-          "uploadTime": "2020-4-4",
+          "uploadTime": req.body.uploadTime,
           "permitVisit": parseInt(req.body.permitVisit)
         }
         var privateKey = result1[0].privateKey
