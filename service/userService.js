@@ -424,45 +424,6 @@ function getBalance(req, callback){
   }
 }
 
-function getBlockInfo(req, callback){
-  if(req.query && req.query.num){
-    dao.adminEthDao.getBlockInfo(req.query.num, function(status, result){
-      if(1 === status){
-        obj._code = '200'
-        obj._msg = '查询成功'
-        obj._data = result
-        callback(obj)
-      } else{
-        obj._code = '201'
-        obj._msg = '查询失败'
-        obj._data = {}
-        callback(obj)
-      }
-    })
-  } else {
-    obj._code = '201'
-    obj._msg = '查询失败'
-    obj._data = {}
-    callback(obj)
-  }
-}
-
-function getMinerInfo(req, callback){
-  dao.adminEthDao.getMinerInfo(function(status, result){
-    if(1 === status){
-      obj._code = '200'
-      obj._msg = '查询成功'
-      obj._data = result
-      callback(obj)
-    } else{
-      obj._code = '201'
-      obj._msg = '查询失败'
-      obj._data = {}
-      callback(obj)
-    }
-  })
-}
-
 module.exports = {
   login,
   register,
