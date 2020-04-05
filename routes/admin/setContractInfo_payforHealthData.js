@@ -7,7 +7,7 @@ var service = require('../../service')
 var checktoken = require('../../middleware/checkToken')
 
 router.post('/', checktoken, function(req, res, next){
-  service.adminService.deleteMedicalService(req, function(result){
+  service.adminService.setContractInfo_payforHealthData(req, function(result){
     res.json(result);
   })
 })

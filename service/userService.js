@@ -1,7 +1,12 @@
 var dao = require('../dao')
 var createToken = require('../middleware/createToken')
+<<<<<<< HEAD
 var HealthDataList = require('../models/HealthDataList')
 
+=======
+var BigNumber = require("bignumber.js")
+var dateUtil = require('../utils/dateUtil')
+>>>>>>> 2329851d5fe320102ba8cda3289c311914365737
 var obj = {
   _code: '',
   _msg: '',
@@ -424,43 +429,67 @@ function getBalance(req, callback){
   }
 }
 
-function getBlockInfo(req, callback){
-  if(req.query && req.query.num){
-    dao.adminEthDao.getBlockInfo(req.query.num, function(status, result){
-      if(1 === status){
-        obj._code = '200'
-        obj._msg = '查询成功'
-        obj._data = result
-        callback(obj)
-      } else{
-        obj._code = '201'
-        obj._msg = '查询失败'
-        obj._data = {}
-        callback(obj)
+function transferUserToUser(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+    var id = req.body.verify.id
+    dao.userDao.findByPrimaryKey(id, function(status, result){
+      if( 1 === status && result[0]){
+        console.log(result[0])
+        dao.userDao.findByAccount(req.body.account, function(status1, result1){
+          if(1 === status1 && result1[0]){
+            var senderPrivateKey = result[0].privateKey;
+            var receiverEthAddr = result1[0].ethAddress;
+            var value = new BigNumber(req.body.value);
+            dao.ethDao.transfer(senderPrivateKey, receiverEthAddr, value, function(sta){
+              if( 1 === sta){
+                var record = {
+                  sendAddress: result[0].ethAddress,  // 发送方地址
+                  recieveAddress: receiverEthAddr,  // 接收方地址
+                  transactEth: value,     // 交易金额
+                  transactTime: dateUtil.format(new Date(), '-'),   // 交易时间
+                  transactAddr: '',       // 交易地址
+                  transactRemarks: req.body.transactRemarks  // 备注
+
+                }
+                dao.transactionrecordDao.insert(record, function(s, r){
+                  if( 1 === s){
+                    obj._code = "200";
+                    obj._msg = "转账成功..记录插入成功..";
+                    obj._data = {};
+                    callback(obj);
+                  }
+                  else{
+                    obj._code = "201";
+                    obj._msg = "交易记录插入失败";
+                    obj._data = {};
+                    callback(obj);
+                  }
+                })
+
+              }
+              else{
+                obj._code = "201";
+                obj._msg = "转账失败..";
+                obj._data = {};
+                callback(obj);
+              }
+            })
+          }else{
+            obj._code = "201";
+            obj._msg = "转账失败..";
+            obj._data = {};
+            callback(obj);
+          }
+        })
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "转账用户不存在..";
+        obj._data = {};
+        callback(obj);
       }
     })
-  } else {
-    obj._code = '201'
-    obj._msg = '查询失败'
-    obj._data = {}
-    callback(obj)
   }
-}
-
-function getMinerInfo(req, callback){
-  dao.adminEthDao.getMinerInfo(function(status, result){
-    if(1 === status){
-      obj._code = '200'
-      obj._msg = '查询成功'
-      obj._data = result
-      callback(obj)
-    } else{
-      obj._code = '201'
-      obj._msg = '查询失败'
-      obj._data = {}
-      callback(obj)
-    }
-  })
 }
 
 module.exports = {
@@ -473,5 +502,6 @@ module.exports = {
   getHealthDataList,
   getHealthCount,
   transfer,
-  getBalance
+  getBalance,
+  transferUserToUser
 }
