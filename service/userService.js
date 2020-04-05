@@ -264,6 +264,17 @@ function getHealthDataList(req, callback){
                     delete result[6]
                     result['index'] = i
                     healthDataList.addHealthData(result)
+                  } else {
+                    healthDataList.addHealthData({
+                      "heartRate": "",
+                      "heat": "",
+                      "sleepQuality": "",
+                      "distance": "",
+                      "evaluation": "",
+                      "uploadTime": "",
+                      "permitVisit": 0,
+                      "index": -1
+                    })
                   }
                 })
               })(i)
