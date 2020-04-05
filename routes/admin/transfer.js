@@ -5,7 +5,9 @@ var service = require('../../service')
 
 var dao = require('../../dao')
 
-router.post('/', function(req, res, next){
+var checktoken = require('../../middleware/checkToken')
+
+router.post('/', checktoken, function(req, res, next){
   service.adminService.transfer(req, function(result){
     res.json(result)
   })

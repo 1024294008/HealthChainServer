@@ -49,7 +49,7 @@ function findByPrimaryKey(params, callback){
 
 // 参数列表{"sendAddress": "", "recieveAddress": "", "transactTime":"", "limit": 1, "page": 2}
 function findByConditionsCount(params, callback){
-  var sql_select_count = 'select count(*) transactionrecord log where 1 = 1 '  // 注意末尾空格
+  var sql_select_count = 'select count(*) as allCount from transactionrecord where 1 = 1 '  // 注意末尾空格
 
   if(params.sendAddress != "" && params.sendAddress != null)
     sql_select_count += 'and sendAddress = ' + '\"'  + params.sendAddress + '\" ' // 字符串拼接需要引号，注意末尾空格
@@ -86,7 +86,8 @@ function findByConditions(params, callback){
   if(params.transactTime != "" && params.transactTime != null)
   sql_select += 'and transactTime = ' + '\"'  + params.transactTime + '\" ' // 字符串拼接需要引号，注意末尾空格
 
-  sql_select += 'limit ?, ?';
+  sql_select += 'limit ' + params.limit*(params.page-1) + ',' + params.limit
+  // sql_select += 'limit ?, ?';
 
   conn.query(sql_select, [params.limit*(params.page-1), params.limit], function(err, res){
     if(err){
