@@ -60,6 +60,10 @@ function findByConditionsCount(params, callback){
   if(params.transactTime != "" && params.transactTime != null)
     sql_select_count += 'and transactTime = ' + '\"'  + params.transactTime + '\" ' // 字符串拼接需要引号，注意末尾空格
 
+  if(params.transactRemarks != "" && params.transactRemarks != null)
+    sql_select_count += 'and transactRemarks = ' + '\"'  + params.transactRemarks + '\" ' // 字符串拼接需要引号，注意末尾空格
+
+
   console.log(sql_select_count)
 
   conn.query(sql_select_count, "",function(err, res){
@@ -78,13 +82,17 @@ function findByConditions(params, callback){
   var sql_select = 'select * from transactionrecord where 1 = 1 '
 
   if(params.operateTime != "" && params.operateTime != null)
-   sql_select += 'and operateTime = ' + '\"' + params.operateTime + '\" '
+    sql_select += 'and operateTime = ' + '\"' + params.operateTime + '\" '
 
   if(params.operateResult != "" && params.operateResult != null)
-   sql_select += 'or operateResult = ' + '\"' + params.operateResult + '\" '
+    sql_select += 'or operateResult = ' + '\"' + params.operateResult + '\" '
 
   if(params.transactTime != "" && params.transactTime != null)
-  sql_select += 'and transactTime = ' + '\"'  + params.transactTime + '\" ' // 字符串拼接需要引号，注意末尾空格
+    sql_select += 'and transactTime = ' + '\"'  + params.transactTime + '\" ' // 字符串拼接需要引号，注意末尾空格
+
+  if(params.transactRemarks != "" && params.transactRemarks != null)
+    sql_select_count += 'and transactRemarks = ' + '\"'  + params.transactRemarks + '\" ' // 字符串拼接需要引号，注意末尾空格
+
 
   sql_select += 'limit ' + params.limit*(params.page-1) + ',' + params.limit
   // sql_select += 'limit ?, ?';

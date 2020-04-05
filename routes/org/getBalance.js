@@ -4,8 +4,8 @@ var router = express.Router()
 var service = require('../../service')
 var checkToken = require('../../middleware/checkToken')
 
-router.post('/', checkToken, function(req, res, next){
-  service.commonService.transfer(req, function(result){
+router.post('/', checkToken,function(req, res, next){
+  service.orgService.getBalance(req, function(result){
     res.json(result)
   })
 })

@@ -26,6 +26,9 @@ module.exports = function(app){
   app.use('/api/org/updateMedicalService', require('./org/updateMedicalService'))
   app.use('/api/org/updateOrgInfo', require('./org/updateOrgInfo'))
   app.use('/api/org/updatePassword', require('./org/updatePassword'))
+  app.use('/api/org/transfer', require('./org/transfer'))
+  app.use('/api/org/getBalance', require('./org/getBalance'))
+  app.use('/api/org/getAllUsers', require('./org/getAllUsers'))
 
   /* admin路由 */
   app.use('/api/admin/login', require('./admin/login'))
@@ -49,12 +52,17 @@ module.exports = function(app){
   app.use('/api/admin/transferToUser', require('./admin/transferToUser'))
   app.use('/api/admin/transfer', require('./admin/transfer'))
   app.use('/api/admin/transactionRecord', require('./admin/transactionRecord'))
+  app.use('/api/admin/transactionRecordByType', require('./admin/transactionRecordByType'))
+  app.use('/api/admin/getMinerInfo', require('./admin/getMinerInfo'))
+  app.use('/api/admin/getBlockInfo', require('./admin/getBlockInfo'))
+
 
 
   /* common路由 */
   app.use('/api/common/getOrgInfo', require('./common/getOrgInfo'))
   app.use('/api/common/getMedicalServiceInfo', require('./common/getMedicalServiceInfo'))
-  app.use('/api/common/transfer', require('./common/transfer'))
+  app.use('/api/common/transferFromUser', require('./common/transferFromUser'))
+  app.use('/api/common/transferFromOrg', require('./common/transferFromOrg'))
   app.use('/api/common/getServiceAndOrg', require('./common/getServiceAndOrg'))
   app.use('/api/common/uploadOrgHealthData', require('./common/uploadOrgHealthData'))
   app.use('/api/common/uploadUserHealthData', require('./common/uploadUserHealthData'))

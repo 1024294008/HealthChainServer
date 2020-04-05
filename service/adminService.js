@@ -2,6 +2,9 @@ var dao = require('../dao')
 var createToken = require('../middleware/createToken')
 var BigNumber = require("bignumber.js")
 var dateUtil = require('../utils/dateUtil')
+var filePath = require("../config/filePath")
+
+var fs=require('fs');
 
 var obj = {
   _code: '',
@@ -21,6 +24,16 @@ var objList = {
     }
   }
 }
+
+log_param = {
+
+  operateId: "",
+  operateDetails: "",
+  operateTime: "",
+  operateResult: ""
+
+}
+
 
 // 管理员登录
 function login(req, callback){
@@ -94,6 +107,10 @@ function addAdminInfo(req, callback){
       contractAddr: "" // 合约地址
     }
 
+    log_param.operateId = req.body.verify.id;
+    log_param.operateDetails = "root用户添加管理员";
+    log_param.operateTime = dateUtil.format(new Date(), '-');
+
     // 判断账户是否存在
     dao.adminDao.findByAccount(req.body.account, function(status, result){
       if( 1 === status && result[0]){
@@ -116,8 +133,34 @@ function addAdminInfo(req, callback){
                 obj._msg = "注册成功";
                 obj._data = {};
                 callback(obj);
+
+                log_param.operateResult = "操作成功";
+
+                dao.logDao.insert(log_param, function(status, result){
+                  if( 1 === status){
+                    console.log("记录已经写入日志");
+                  }
+                  else
+                  {
+                    console.log("日志写入失败");
+                  }
+                })
               }
               else{
+
+                log_param.operateResult = "操作成功";
+
+                dao.logDao.insert(log_param, function(status, result){
+                  if( 1 === status){
+                    console.log("记录已经写入日志");
+                  }
+                  else
+                  {
+                    console.log("日志写入失败");
+                  }
+                })
+
+
                 obj._code = "201";
                 obj._msg = "注册失败";
                 obj._data = {};
@@ -147,8 +190,25 @@ function addAdminInfo(req, callback){
 function deleteAdmin(req, callback){
   if(req.body && req.body.verify && req.body.verify.id && req.body.id && req.body.verify.id === 1){
     var params = req.body.id
+
+    log_param.operateId = req.body.verify.id;
+    log_param.operateDetails = "root用户删除管理员, id:" + params;
+    log_param.operateTime = dateUtil.format(new Date(), '-');
+
     dao.adminDao.deleteByPrimaryKey(params, function(status, result){
       if( 1 === status ){
+
+        log_param.operateResult = "操作成功";
+
+        dao.logDao.insert(log_param, function(status, result){
+          if( 1 === status){
+            console.log("记录已经写入日志");
+          }
+          else{
+            console.log("日志写入失败");
+          }
+        })
+
         obj._code = "200";
         obj._msg = "删除成功";
         obj._data = {};
@@ -176,8 +236,24 @@ function updateAdmin(req, callback){
 
     var id = req.body.id;
 
+    log_param.operateId = req.body.verify.id;
+    log_param.operateDetails = "root用户修改管理员, id:" + id;
+    log_param.operateTime = dateUtil.format(new Date(), '-');
+
     dao.adminDao.updateByPrimaryKey([admin, id], function(status, result){
       if( 1 === status ){
+
+        log_param.operateResult = "操作成功";
+
+        dao.logDao.insert(log_param, function(status, result){
+          if( 1 === status){
+            console.log("记录已经写入日志");
+          }
+          else{
+            console.log("日志写入失败");
+          }
+        })
+
         obj._code = "200";
         obj._msg = "修改成功";
         obj._data = {};
@@ -311,16 +387,56 @@ function getOrgInfoList(req, callback){
 
 }
 
-// 修改机构信息(只能修改审核状态)
+// 修改机构信息
 function updateOrgInfo(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
-    var params = {
-      certificateResult: req.body.certificateResult
+    var params = {}
+    // 如果审核通过
+    if(req.body.certificateResult === '审核通过'){
+      params = {
+        certificateResult: req.body.certificateResult
+      }
     }
+    // 如果审核未通过
+    else{
+      // 获取要删除的认证文件路径名
+      var file = filePath.filePath
+      dao.orgDao.findByPrimaryKey(req.body.id, function(s, r){
+        if(1 === s && r[0]){
+          file += r[0].certificateFiles
+          console.log(file)
+          // 删除认证文件
+          fs.unlinkSync(file);
+        }
+      })
+
+      // 将认证文件置空
+      params = {
+        certificateResult: req.body.certificateResult,
+        certificateFiles: ""
+      }
+    }
+
     var id = req.body.id;
+
+    log_param.operateId = req.body.verify.id;
+    log_param.operateDetails = "管理员审核机构, id:" + id + ", 审核结果: " + req.body.certificateResult;
+    log_param.operateTime = dateUtil.format(new Date(), '-');
 
     dao.orgDao.updateByPrimaryKey([params, id], function(status, result){
       if( 1 === status){
+
+        log_param.operateResult = "操作成功";
+
+        dao.logDao.insert(log_param, function(status, result){
+          if( 1 === status){
+            console.log("记录已经写入日志");
+          }
+          else{
+            console.log("日志写入失败");
+          }
+        })
+
         obj._code = "200";
         obj._msg = "修改成功";
         obj._data = {};
@@ -347,8 +463,25 @@ function updateOrgInfo(req, callback){
 function delOrgInfo(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     var id = req.body.id;
+
+    log_param.operateId = req.body.verify.id;
+    log_param.operateDetails = "管理员删除机构, id:" + id;
+    log_param.operateTime = dateUtil.format(new Date(), '-');
+
     dao.orgDao.deleteByPrimaryKey([id], function(status, result){  // 这里的参数要给成[]
       if( 1 === status){
+
+        log_param.operateResult = "操作成功";
+
+        dao.logDao.insert(log_param, function(status, result){
+          if( 1 === status){
+            console.log("记录已经写入日志");
+          }
+          else{
+            console.log("日志写入失败");
+          }
+        })
+
         obj._code = "200";
         obj._msg = "删除成功";
         obj._data = {};
@@ -372,11 +505,28 @@ function delOrgInfo(req, callback){
 
 // 删除医疗服务
 function deleteMedicalService(req, callback){
-  console.log("删除医疗服务~~");
+
   if(req.body && req.body.verify && req.body.verify.id){
     var id = req.body.id;
+
+    log_param.operateId = req.body.verify.id;
+    log_param.operateDetails = "管理员删除服务, id:" + id;
+    log_param.operateTime = dateUtil.format(new Date(), '-');
+
     dao.medicalServiceDao.deleteByPrimaryKey(id, function(status, result){
       if( 1 === status){
+
+        log_param.operateResult = "操作成功";
+
+        dao.logDao.insert(log_param, function(status, result){
+          if( 1 === status){
+            console.log("记录已经写入日志");
+          }
+          else{
+            console.log("日志写入失败");
+          }
+        })
+
         obj._code = "200";
         obj._msg = "删除成功";
         obj._data = {};
@@ -462,8 +612,24 @@ function updateMedicalServcie(req, callback){
 
     var id = req.body.id;
 
+    log_param.operateId = req.body.verify.id;
+    log_param.operateDetails = "管理员审核服务, id:" + id + ", 审核结果: " + req.body.certificateResult;
+    log_param.operateTime = dateUtil.format(new Date(), '-');
+
     dao.medicalServiceDao.updateByPrimaryKey([params, id], function(status, result){
       if( 1 === status){
+
+        log_param.operateResult = "操作成功";
+
+        dao.logDao.insert(log_param, function(status, result){
+          if( 1 === status){
+            console.log("记录已经写入日志");
+          }
+          else{
+            console.log("日志写入失败");
+          }
+        })
+
         obj._code = "200";
         obj._msg = "修改成功..";
         obj._data = {};
@@ -486,9 +652,45 @@ function updateMedicalServcie(req, callback){
 }
 
 // 获取区块信息
-function getBlockInfo(req, callback){
+function getBlockInfo(req, callback){
+    if(req.query && req.query.num){
+      dao.adminEthDao.getBlockInfo(req.query.num, function(status, result){
+        if(1 === status){
+          obj._code = '200'
+          obj._msg = '查询成功'
+          obj._data = result
+          callback(obj)
+        } else{
+          obj._code = '201'
+          obj._msg = '查询失败'
+          obj._data = {}
+          callback(obj)
+        }
+      })
+    } else {
+      obj._code = '201'
+      obj._msg = '查询失败'
+      obj._data = {}
+      callback(obj)
+    }
+  }
 
-}
+// 获取挖矿信息
+function getMinerInfo(req, callback){
+    dao.adminEthDao.getMinerInfo(function(status, result){
+      if(1 === status){
+        obj._code = '200'
+        obj._msg = '查询成功'
+        obj._data = result
+        callback(obj)
+      } else{
+        obj._code = '201'
+        obj._msg = '查询失败'
+        obj._data = {}
+        callback(obj)
+      }
+    })
+  }
 
 // 获取日志信息
 function getLogList(req, callback){
@@ -643,10 +845,26 @@ function updateUserInfo(req, callback){
     }
     var id = req.body.id;
 
-    console.log([params, id]);
+    log_param.operateId = req.body.verify.id;
+    log_param.operateDetails = "管理员修改用户信息, id:" + id;
+    log_param.operateTime = dateUtil.format(new Date(), '-');
+
+    console.log(log_param);
 
     dao.userDao.updateByPrimaryKey([params, id], function(status, result){
       if( 1 === status){
+
+        log_param.operateResult = "操作成功";
+
+        dao.logDao.insert(log_param, function(status, result){
+          if( 1 === status){
+            console.log("记录已经写入日志");
+          }
+          else{
+            console.log("日志写入失败");
+          }
+        })
+
         obj._code = "200";
         obj._msg = "修改成功";
         obj._data = {};
@@ -673,8 +891,25 @@ function updateUserInfo(req, callback){
 function deleteUser(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     var id = req.body.id;
+
+    log_param.operateId = req.body.verify.id;
+    log_param.operateDetails = "管理员修改用户信息, id:" + id;
+    log_param.operateTime = dateUtil.format(new Date(), '-');
+
     dao.userDao.deleteByPrimaryKey([id], function(status, result){
       if( 1 === status){
+
+        log_param.operateResult = "操作成功";
+
+        dao.logDao.insert(log_param, function(status, result){
+          if( 1 === status){
+            console.log("记录已经写入日志");
+          }
+          else{
+            console.log("日志写入失败");
+          }
+        })
+
         obj._code = "200";
         obj._msg = "删除成功";
         obj._data = {};
@@ -825,12 +1060,13 @@ function transfer(req, callback){
   }
 }
 
-// 查看交记录
+// 查看交记录    ---   转账记录
 function transactionRecord(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     var params = {
       sendAddress: req.body.sendAddress,       // 发送方是自己
       recieveAddress: req.body.sendAddress,    // 接受放也是自己
+      transactRemarks: "",
       transactTime: "",
       limit: req.body.limit,
       page: req.body.page
@@ -886,6 +1122,69 @@ function transactionRecord(req, callback){
   }
 }
 
+// 查看转账记录 --- 根据备注（交易类型查看）
+function transactionRecordByType(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+    var params = {
+      sendAddress: req.body.sendAddress,       // 发送方是自己
+      recieveAddress: "",
+      transactRemarks: req.body.transactRemarks, // 备注（交易类型）
+      transactTime: "",
+      limit: req.body.limit,
+      page: req.body.page
+    }
+
+    dao.transactionrecordDao.findByConditionsCount(params, function(status, result){
+      if( 1=== status && result[0]){
+        // objList._code = "200";
+        // objList._msg = "查找成功";
+        // objList._data.dataList.count = result[0];
+
+        var res_json = {
+          code: 0,
+          msg: '',
+          count: 0,
+          data: []
+        }
+
+        res_json.count = result[0].allCount;
+
+        dao.transactionrecordDao.findByConditions(params, function(st, re){
+          if( 1=== st && re[0]){
+            // objList._data.dataList.data = re;
+            // callback(objList);
+
+            res_json.data = re;
+
+            callback(res_json);
+          }
+          else {
+            obj._code = "201";
+            obj._msg = "查找失败";
+            obj._data = {};
+            callback(obj);
+          }
+        });
+
+      }
+      else {
+        obj._code = "201";
+        obj._msg = "查找失败";
+        obj._data = {};
+        callback(obj);
+      }
+    });
+
+  }
+  else{
+    obj._code = "201";
+    obj._msg = "查找失败..";
+    obj._data = {};
+    callback(obj);
+  }
+}
+
+
 module.exports = {
   login,
   addAdminInfo,
@@ -903,9 +1202,12 @@ module.exports = {
   findUserInfo,
   updateUserInfo,
   deleteUser,
+  getBlockInfo,
+  getMinerInfo,
   getWalletInfo,
   isSuperAdmin,
   transferToUser,
   transfer,
-  transactionRecord
+  transactionRecord,
+  transactionRecordByType
 }
