@@ -5,7 +5,7 @@ var service = require('../../service')
 var checkToken = require('../../middleware/checkToken')
 
 router.post('/', checkToken, function(req, res, next){
-  service.userService.getHealthData(req, function(result){
+  service.commonService.uploadOrgHealthData(req, function(result){
     res.json(result)
   })
 })
