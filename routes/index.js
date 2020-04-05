@@ -45,6 +45,10 @@ module.exports = function(app){
   app.use('/api/admin/transferToUser', require('./admin/transferToUser'))
   app.use('/api/admin/transfer', require('./admin/transfer'))
   app.use('/api/admin/transactionRecord', require('./admin/transactionRecord'))
+  app.use('/api/admin/transactionRecordByType', require('./admin/transactionRecordByType'))
+  app.use('/api/admin/getMinerInfo', require('./admin/getMinerInfo'))
+  app.use('/api/admin/getBlockInfo', require('./admin/getBlockInfo'))
+
 
 
   /* common路由 */
