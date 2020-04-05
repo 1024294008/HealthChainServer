@@ -44,6 +44,11 @@ module.exports = function(app){
   app.use('/api/admin/deleteUser', require('./admin/deleteUser'))
   app.use('/api/admin/getWalletInfo', require('./admin/getWalletInfo'))
   app.use('/api/admin/isSuperAdmin', require('./admin/isSuperAdmin'))
+  app.use('/api/admin/transferToUser', require('./admin/transferToUser'))
+  app.use('/api/admin/transfer', require('./admin/transfer'))
+  app.use('/api/admin/transactionRecord', require('./admin/transactionRecord'))
+
+
   /* common路由 */
   app.use('/api/common/getOrgInfo', require('./common/getOrgInfo'))
   app.use('/api/common/getMedicalServiceInfo', require('./common/getMedicalServiceInfo'))

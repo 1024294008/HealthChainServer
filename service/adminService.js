@@ -1,5 +1,7 @@
 var dao = require('../dao')
 var createToken = require('../middleware/createToken')
+var BigNumber = require("bignumber.js")
+var dateUtil = require('../utils/dateUtil')
 
 var obj = {
   _code: '',
@@ -32,6 +34,7 @@ function login(req, callback){
         delete result[0].privateKey;
         delete result[0].contractAddr;
         // obj._data.adminInfo = result[0];
+
         obj._data.adminInfo = JSON.stringify(result[0])
         callback(obj);
       }
@@ -76,21 +79,19 @@ function isSuperAdmin(req, callback){
     callback(obj);
   }
 }
+
 // 添加管理员
 function addAdminInfo(req, callback){
+  console.log(req.body)
   if(req.body && req.body.account && req.body.password && req.body.verify && req.body.verify.id && req.body.verify.id === 1){
-
-    var ethaddr = "0xxxx788xx" // 调用web3产生的账户
-    var key = "0xxxxx556xx"  // 调用web3产生的
-    var cAddr = "0xxxxxx889999"  // 合约地址
 
     var admin = {
       account: req.body.account,
       password: req.body.password,
       authority: req.body.authority,
-      ethAddress: ethaddr,
-      privateKey: key,
-      contractAddr: cAddr
+      ethAddress: "",  // 以太坊账户
+      privateKey: "",  // 私钥
+      contractAddr: "" // 合约地址
     }
 
     // 判断账户是否存在
@@ -102,12 +103,27 @@ function addAdminInfo(req, callback){
         callback(obj);
       }
       else{
-        dao.adminDao.insert(admin, function(status, result){
-          if(1 === status){
-            obj._code = "200";
-            obj._msg = "注册成功";
-            obj._data = {};
-            callback(obj);
+
+        dao.ethDao.createAccout(function(sta, res){
+          if( 1 === sta){
+            admin.ethAddress = res.ethAddress;
+            admin.privateKey = res.privateKey;
+            admin.contractAddr = res.contractAddr
+
+            dao.adminDao.insert(admin, function(st, re){
+              if(1 === st){
+                obj._code = "200";
+                obj._msg = "注册成功";
+                obj._data = {};
+                callback(obj);
+              }
+              else{
+                obj._code = "201";
+                obj._msg = "注册失败";
+                obj._data = {};
+                callback(obj);
+              }
+            })
           }
           else{
             obj._code = "201";
@@ -486,7 +502,7 @@ function getLogList(req, callback){
     }
 
     dao.logDao.findByConditionsCount(params, function(status, result){
-      if( 1 === status && result[0]){
+      if( 1 === status){
         // objList._code = "200";
         // objList._msg = "查找成功";
         // objList._data.dataList.count = result[0];
@@ -501,7 +517,7 @@ function getLogList(req, callback){
         res_json.count = result[0].allCount;
 
         dao.logDao.findByConditions(params, function(st, re){
-          if( 1 === st && re[0]){
+          if( 1 === st){
             // objList._data.dataList.data = re;
             // callback(objList);
 
@@ -683,30 +699,188 @@ function deleteUser(req, callback){
 // 查看钱包信息
 function getWalletInfo(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
-    var params = {
-      id: req.body.id
-    }
-
-    dao.adminDao.findByPrimaryKey(params, function(status, result){
-      if( 1 === status){
-        obj._code = "201";
-        obj._msg = "查看成功..";
-        delete result[0].password;    // delete表示隐藏属性
-        delete result[0].privateKey;
-        obj._data = result[0];
+    var ethAddress = req.body.ethAddress;
+    dao.ethDao.getBalance(ethAddress, function(status, result){
+      if( 1 === status)
+      {
+        obj._code = "200";
+        obj._msg = "余额获取成功";
+        obj._data.balance = result;
         callback(obj);
       }
       else{
         obj._code = "201";
-        obj._msg = "查看失败..";
+        obj._msg = "余额获取失败..";
+        obj._data = {};
+        callback(obj);
+      }
+
+    })
+  }
+  else{
+    obj._code = "201";
+    obj._msg = "余额获取失败..";
+    obj._data = {};
+    callback(obj);
+  }
+}
+
+// root用户向管理员转账
+function transferToUser(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id && req.body.verify.id === 1){
+    var receiverEthAddr = req.body.receiverEthAddr;
+    var value = new BigNumber(req.body.value);
+    dao.ethDao.transferToUser(receiverEthAddr, value, function(status){
+      if( 1 === sta){
+        var record = {
+          sendAddress: req.body.sendAddress,  // 发送方地址
+          recieveAddress: receiverEthAddr,  // 接收方地址
+          transactEth: value,     // 交易金额
+          transactTime: dateUtil.format(new Date(), '-'),   // 交易时间
+          transactAddr: '',       // 交易地址
+          transactRemarks: req.body.transactRemarks  // 备注
+
+        }
+        dao.transactionrecordDao.insert(record, function(s, r){
+          if( 1 === s){
+            obj._code = "200";
+            obj._msg = "转账成功..记录插入成功..";
+            obj._data = {};
+            callback(obj);
+          }
+          else{
+            obj._code = "201";
+            obj._msg = "交易记录插入失败";
+            obj._data = {};
+            callback(obj);
+          }
+        })
+
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "转账失败..";
         obj._data = {};
         callback(obj);
       }
     })
   }
+}
+
+// 管理员转账
+function transfer(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+    var id = req.body.verify.id
+
+    dao.adminDao.findByPrimaryKey(id, function(status, result){
+
+      if( 1 === status && result[0]){
+        var senderPrivateKey = result[0].privateKey;
+        var receiverEthAddr = req.body.receiverEthAddr;
+        var value = new BigNumber(req.body.value);
+
+        dao.ethDao.transfer(senderPrivateKey, receiverEthAddr, value, function(sta){
+          console.log("进入到转账函数.." + sta)
+          if( 1 === sta){
+            var record = {
+              sendAddress: result[0].ethAddress,  // 发送方地址
+              recieveAddress: receiverEthAddr,  // 接收方地址
+              transactEth: value,     // 交易金额
+              transactTime: dateUtil.format(new Date(), '-'),   // 交易时间
+              transactAddr: '',       // 交易地址
+              transactRemarks: req.body.transactRemarks  // 备注
+            }
+
+            dao.transactionrecordDao.insert(record, function(s, r){
+              if( 1 === s){
+                obj._code = "200";
+                obj._msg = "转账成功..记录插入成功..";
+                obj._data = {};
+                callback(obj);
+              }
+              else{
+                obj._code = "201";
+                obj._msg = "交易记录插入失败";
+                obj._data = {};
+                callback(obj);
+              }
+            })
+
+          }
+          else{
+            obj._code = "201";
+            obj._msg = "转账失败..";
+            obj._data = {};
+            callback(obj);
+          }
+        })
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "转账用户不存在..";
+        obj._data = {};
+        callback(obj);
+      }
+    })
+  }
+}
+
+// 查看交记录
+function transactionRecord(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+    var params = {
+      sendAddress: req.body.sendAddress,       // 发送方是自己
+      recieveAddress: req.body.sendAddress,    // 接受放也是自己
+      transactTime: "",
+      limit: req.body.limit,
+      page: req.body.page
+    }
+
+    dao.transactionrecordDao.findByConditionsCount(params, function(status, result){
+      if( 1=== status && result[0]){
+        // objList._code = "200";
+        // objList._msg = "查找成功";
+        // objList._data.dataList.count = result[0];
+
+        var res_json = {
+          code: 0,
+          msg: '',
+          count: 0,
+          data: []
+        }
+
+        res_json.count = result[0].allCount;
+
+        dao.transactionrecordDao.findByConditions(params, function(st, re){
+          if( 1=== st && re[0]){
+            // objList._data.dataList.data = re;
+            // callback(objList);
+
+            res_json.data = re;
+
+            callback(res_json);
+          }
+          else {
+            obj._code = "201";
+            obj._msg = "查找失败";
+            obj._data = {};
+            callback(obj);
+          }
+        });
+
+      }
+      else {
+        obj._code = "201";
+        obj._msg = "查找失败";
+        obj._data = {};
+        callback(obj);
+      }
+    });
+
+  }
   else{
     obj._code = "201";
-    obj._msg = "查看失败..";
+    obj._msg = "查找失败..";
     obj._data = {};
     callback(obj);
   }
@@ -730,5 +904,8 @@ module.exports = {
   updateUserInfo,
   deleteUser,
   getWalletInfo,
-  isSuperAdmin
+  isSuperAdmin,
+  transferToUser,
+  transfer,
+  transactionRecord
 }
