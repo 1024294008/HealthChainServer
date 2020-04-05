@@ -2,6 +2,9 @@ var dao = require('../dao')
 var createToken = require('../middleware/createToken')
 var BigNumber = require("bignumber.js")
 var dateUtil = require('../utils/dateUtil')
+var filePath = require("../config/filePath")
+
+var fs=require('fs');
 
 var obj = {
   _code: '',
@@ -384,12 +387,36 @@ function getOrgInfoList(req, callback){
 
 }
 
-// 修改机构信息(只能修改审核状态)
+// 修改机构信息
 function updateOrgInfo(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
-    var params = {
-      certificateResult: req.body.certificateResult
+    var params = {}
+    // 如果审核通过
+    if(req.body.certificateResult === '审核通过'){
+      params = {
+        certificateResult: req.body.certificateResult
+      }
     }
+    // 如果审核未通过
+    else{
+      // 获取要删除的认证文件路径名
+      var file = filePath.filePath
+      dao.orgDao.findByPrimaryKey(req.body.id, function(s, r){
+        if(1 === s && r[0]){
+          file += r[0].certificateFiles
+          console.log(file)
+          // 删除认证文件
+          fs.unlinkSync(file);
+        }
+      })
+
+      // 将认证文件置空
+      params = {
+        certificateResult: req.body.certificateResult,
+        certificateFiles: ""
+      }
+    }
+
     var id = req.body.id;
 
     log_param.operateId = req.body.verify.id;
