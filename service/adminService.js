@@ -1157,6 +1157,144 @@ function transactionRecordByType(req, callback){
   }
 }
 
+// 合约参数
+var contractInfo = {
+  "payforHealthData": 0,      // 单次授权消耗的以太币
+  "validSection": 0,          // 授权有效时间间隔
+  "uploadSection": 0,         // 上传有效时间间隔
+  "award": 0                  // 用户上传数据可获得的奖励
+}
+
+// 查看合约参数
+function getContractInfo_payforHealthData(req, callback){
+  dao.adminEthDao.getPayforHealthData(function(status, result){
+    if( 1 === status){
+      contractInfo.payforHealthData = result
+      obj._code = "200";
+      obj._msg = "合约参数查找成功.. 单次授权消耗的以太币";
+      obj._data = contractInfo;
+      callback(obj);
+    }
+  })
+}
+
+function getContractInfo_validSection(req, callback){
+  dao.adminEthDao.getValidSection(function(status, result){
+    if( 1 === status){
+      contractInfo.validSection = result
+      obj._code = "200";
+      obj._msg = "合约参数查找成功.. 授权有效时间间隔";
+      obj._data = contractInfo;
+      callback(obj);
+    }
+  })
+
+}
+
+function getContractInfo_uploadSection(req, callback){
+  dao.adminEthDao.getUploadSection(function(status, result){
+    if( 1 === status){
+      contractInfo.uploadSection = result
+      obj._code = "200";
+      obj._msg = "合约参数查找成功.. 上传有效时间间隔";
+      obj._data = contractInfo;
+      callback(obj);
+    }
+  })
+}
+
+
+function getContractInfo_award(req, callback){
+  dao.adminEthDao.getAward(function(status, result){
+    if( 1 === status){
+      contractInfo.award = result
+      obj._code = "200";
+      obj._msg = "合约参数查找成功.. 奖励";
+      obj._data = contractInfo;
+      callback(obj);
+    }
+  })
+
+}
+
+// 设置合约参数
+function setContractInfo_payforHealthData(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id && req.body.verify.id === 1){
+      dao.adminEthDao.setPayforHealthData(req.body.payforHealthData, function(status){
+        if( 1 === status){
+          console.log("单次授权消耗的以太币参数设置成功");
+          obj._code = "200";
+          obj._msg = "合约参数设置成功";
+          obj._data = {};
+          callback(obj);
+        }
+      })
+  }
+  else{
+    obj._code = "201";
+    obj._msg = "合约参数设置失败";
+    obj._data = {};
+    callback(obj);
+  }
+}
+
+  function setContractInfo_validSection(req, callback){
+    if(req.body && req.body.verify && req.body.verify.id && req.body.verify.id === 1){
+      dao.adminEthDao.setValidSection(req.body.validSection, function(status){
+        console.log("授权时间参数设置成功");
+        obj._code = "200";
+        obj._msg = "合约参数设置成功";
+        obj._data = {};
+        callback(obj);
+      })
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "合约参数设置失败";
+        obj._data = {};
+        callback(obj);
+      }
+}
+
+  function setContractInfo_uploadSection(req, callback){
+    console.log(contractInfo)
+    console.log(req.body.uploadSection)
+    if(req.body && req.body.verify && req.body.verify.id && req.body.verify.id === 1){
+      dao.adminEthDao.setUploadSection(req.body.uploadSection, function(status){
+        console.log("上传数据时间间隔参数设置成功");
+        obj._code = "200";
+        obj._msg = "合约参数设置成功";
+        obj._data = {};
+        callback(obj);
+      })
+  }
+  else{
+    obj._code = "201";
+    obj._msg = "合约参数设置失败";
+    obj._data = {};
+    callback(obj);
+  }
+}
+
+  function setContractInfo_award(req, callback){
+    if(req.body && req.body.verify && req.body.verify.id && req.body.verify.id === 1){
+      console.log("修改奖励金额.......")
+        dao.adminEthDao.setAward(req.body.award, function(status){
+          console.log("上传数据奖励参数设置成功");
+          obj._code = "200";
+          obj._msg = "合约参数设置成功";
+          obj._data = {};
+          callback(obj);
+        })
+    }
+    else{
+      obj._code = "201";
+      obj._msg = "合约参数设置失败";
+      obj._data = {};
+      callback(obj);
+    }
+}
+
 
 module.exports = {
   login,
@@ -1182,5 +1320,13 @@ module.exports = {
   transferToUser,
   transfer,
   transactionRecord,
-  transactionRecordByType
+  transactionRecordByType,
+  getContractInfo_payforHealthData,
+  getContractInfo_uploadSection,
+  getContractInfo_validSection,
+  getContractInfo_award,
+  setContractInfo_payforHealthData,
+  setContractInfo_uploadSection,
+  setContractInfo_validSection,
+  setContractInfo_award
 }

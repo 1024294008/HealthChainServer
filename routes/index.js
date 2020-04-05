@@ -49,6 +49,18 @@ module.exports = function(app){
   app.use('/api/admin/getMinerInfo', require('./admin/getMinerInfo'))
   app.use('/api/admin/getBlockInfo', require('./admin/getBlockInfo'))
 
+  app.use('/api/admin/getContractInfo_payforHealthData', require('./admin/getContractInfo_payforHealthData'))
+  app.use('/api/admin/getContractInfo_uploadSection', require('./admin/getContractInfo_uploadSection'))
+  app.use('/api/admin/getContractInfo_validSection', require('./admin/getContractInfo_validSection'))
+  app.use('/api/admin/getContractInfo_award', require('./admin/getContractInfo_award'))
+
+  app.use('/api/admin/setContractInfo_payforHealthData', require('./admin/setContractInfo_payforHealthData'))
+  app.use('/api/admin/setContractInfo_uploadSection', require('./admin/setContractInfo_uploadSection'))
+  app.use('/api/admin/setContractInfo_validSection', require('./admin/setContractInfo_validSection'))
+  app.use('/api/admin/setContractInfo_award', require('./admin/setContractInfo_award'))
+
+
+
 
 
   /* common路由 */
