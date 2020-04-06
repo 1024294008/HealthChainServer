@@ -47,6 +47,21 @@ function findByPrimaryKey(params, callback){
   })
 }
 
+//参数发送者ethAddress
+function findBysendAddress(params, callback){
+  var sql_select = "select * from transactionrecord where 1 = 1 and sendAddress = ?"
+
+  conn.query(sql_select, [params], function(err, res){
+    if(err){
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0);
+      return false;
+    }
+    console.log("查找成功");
+    callback(1, res);
+  })
+}
+
 // 参数列表{"sendAddress": "", "recieveAddress": "", "transactTime":"", "limit": 1, "page": 2}
 function findByConditionsCount(params, callback){
   var sql_select_count = 'select count(*) as allCount from transactionrecord where 1 = 1 '  // 注意末尾空格

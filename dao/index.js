@@ -7,7 +7,7 @@ var transactionrecordDao = require('./transactionrecordDao')
 var userDao= require('./userDao')
 var medicalServiceDao = require('./medicalServiceDao')
 var orgDao = require('./orgDao')
-// var visitorrecordDao = require('./visitorrecordDao')
+var visitorrecordDao = require('./visitorrecordDao')
 var ethDao = require('./ethDao')
 var adminEthDao = require('./adminEthDao')
 
@@ -19,6 +19,6 @@ exports.transactionrecordDao = transactionrecordDao
 exports.userDao = userDao
 exports.medicalServiceDao = medicalServiceDao
 exports.orgDao = orgDao
-// exports.visitorrecordDao = visitorrecordDao
+exports.visitorrecordDao = visitorrecordDao
 exports.ethDao = ethDao
 exports.adminEthDao = adminEthDao

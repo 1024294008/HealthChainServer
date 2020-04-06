@@ -451,18 +451,34 @@ function getBalance(req,callback){
 function getAllUsers(req,callback){
   if(req.body.verify && req.body.verify.id){
     var json_getAllUsers = {
-      "id":req.body.verify.id,
       "page":req.body.page,
       "limit":req.body.limit
     }
+    var ethAddress;
+    dao.orgDao.findByPrimaryKey(req.body.verify.id, function(status, result){
+      ethAddress = result[0].ethAddress
+    })
     dao.userDao.findByConditionsCount(json_getAllUsers,function(status1,result1){
       if (1===status1) {
         //说明获取到了总数,继续获取分页数据
         var allCount = result1[0].allCount;
-
+        console.log("查到的总数："+allCount)
         dao.userDao.findByConditions(json_getAllUsers,function(status2,result2){
           if (1===status2) {
             //说明获取成功
+            for(var i = 0; i < allCount; i++){
+
+              dao.ethDao.getPublicHealthCount(result2[i].contractAddr,function(_sta,_res){
+                result2[i].sum = _res
+              })
+              dao.ethDao.getAuthInfo([ethAddress,result2[i].contractAddr],function(_sta,_res){
+                if (_res>0) {
+                  result2[i].paid = "1"
+                } else {
+                  result2[i].paid = "0"
+                }
+              })
+            }
             var jsonResult = {
               code:0,
               msg:'',
@@ -488,6 +504,79 @@ function getAllUsers(req,callback){
 
   }
 }
+//15 得到用户授权
+//参数：token,目标用户contractAddr，目标用户id,目标用户ethAddress
+function getUserAuth(req, callback){
+if(req.body.verify && req.body.verify.id && req.body && req.body.contractAddr){
+  dao.orgDao.findByPrimaryKey(req.body.verify.id, function(status, result){
+    dao.ethDao.authToOrg(result[0].organizationName,result[0].privateKey,req.body.contractAddr,0.2,function(_status,_result){
+      if( 1 === status)
+      {
+        obj._code = "200";
+        obj._msg = "获取授权成功";
+        obj._data= result;
+        callback(obj);
+        var json_trans = {
+          sendAddress:result[0].ethAddress,
+          recieveAddress:req.body.ethAddress,
+          transactEth:0.2,
+          transactTime:Date.now(),
+          transactRemarks:"机构获取授权"
+        }
+        dao.transactionrecordDao.insert(json_trans,function(status_,result_){
+          if( 1 === status)
+          {
+            var json_visit = {
+              userId:req.body.id,
+              visitorId:req.body.verify.id,
+              visitTime:Date.now()
+            }
+            dao.visitorrecordDao.insert(json_visit,function(sta,res){
+              if( 1 === status){
+                obj._code = "200";
+                obj._msg = "新增访客记录成功";
+                obj._data= {};
+                callback(obj);
+              }else{
+                obj._code = "201";
+                obj._msg = "新增访客记录失败";
+                obj._data= {};
+                callback(obj);
+              }
+            })
+          }
+          else{
+            obj._code = "201";
+            obj._msg = "插入交易记录失败";
+            obj._data = {};
+            callback(obj);
+          }
+        })
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "获取授权失败，请检查账户余额是否充足！";
+        obj._data = {};
+        callback(obj);
+      }
+    })
+  })
+}
+}
+//16已经获取授权的用户直接查看用户的数据
+function getAllHealthData(req,callback){
+if(req.body.verify && req.body.verify.id && req.body && req.body.contractAddr){
+  //通过交易记录表查当前机构的付款记录
+  dao.transactionrecordDao.findBysendAddress(req.body.ethAddress,function(status,result){
+    for(var i = 0; i < result.length; i++){
+      //逐个获得用户信息
+      dao.userDao.findByEthAddress(result[i].recieveAddress,function(status1,result1){
+        //拿到了用户，逐个取数据
+
+      })
+    }
+  })
+}}
 module.exports = {
   login,
   register,
@@ -502,5 +591,7 @@ module.exports = {
   updatePassword,
   transfer,
   getBalance,
-  getAllUsers
+  getAllUsers,
+  getUserAuth,
+  getAllHealthData
 }
