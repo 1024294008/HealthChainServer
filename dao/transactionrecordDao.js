@@ -123,11 +123,26 @@ function findBytransactRemarks(params, callback){
   })
 }
 
+// 根据以太坊地址查询交易记录   -- 自己的交易记录
+function findByEthAddress(params, callback){
+  var sql_select = "select * from transactionrecord where sendAddress = ? or recieveAddress = ? "
+  conn.query(sql_select, [params, params], function(err, res){
+    if(err){
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0);
+      return false;
+    }
+    console.log("查找成功")
+    callback(1, res);
+  })
+}
+
 module.exports = {
   insert,
   deleteByPrimaryKey,
   findByPrimaryKey,
   findByConditionsCount,
   findByConditions,
-  findBytransactRemarks
+  findBytransactRemarks,
+  findByEthAddress
 }

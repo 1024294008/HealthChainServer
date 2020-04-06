@@ -16,6 +16,10 @@ module.exports = function(app){
   app.use('/api/user/transferUserToUser', require('./users/transferUserToUser'))
   app.use('/api/user/findRecordAndOrnInfoByUserId', require('./users/findRecordAndOrnInfoByUserId'))
   app.use('/api/user/findBytransactRemarks', require('./users/findBytransactRemarks'))
+  app.use('/api/user/findRecordByEthAddress', require('./users/findRecordByEthAddress'))
+  app.use('/api/user/UserTransactionRecordDetail', require('./users/UserTransactionRecordDetail'))
+
+
 
 
   /* org路由 */
