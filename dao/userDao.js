@@ -112,6 +112,23 @@ function findByConditions(params, callback){
   })
 }
 
+// 获取用户交易记录
+function findTransactByUserAddress(params, callback){
+  var sql_select = 'select transactionrecord.* from transactionrecord, user where (user.ethAddress = transactionrecord.sendAddress or user.ethAddress = transactionrecord.recieveAddress) and user.ethAddress = ?'
+
+  conn.query(sql_select, params, function(err, result){
+    if(err){
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0)
+      return
+    }
+    console.log("查询成功")
+    callback(1, result)
+  })
+}
+
+
+
 module.exports = {
   insert,
   deleteByPrimaryKey,
@@ -121,4 +138,5 @@ module.exports = {
   findByEthAddress,
   findByConditionsCount,
   findByConditions,
+  findTransactByUserAddress
 }

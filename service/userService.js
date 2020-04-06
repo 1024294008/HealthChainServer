@@ -445,7 +445,7 @@ function transferUserToUser(req, callback){
                   recieveAddress: receiverEthAddr,  // 接收方地址
                   transactEth: value,     // 交易金额
                   transactTime: dateUtil.format(new Date(), '-'),   // 交易时间
-                  transactAddr: '',       // 交易地址
+                  // transactAddr: '',       // 交易地址
                   transactRemarks: req.body.transactRemarks  // 备注
 
                 }
@@ -490,6 +490,52 @@ function transferUserToUser(req, callback){
   }
 }
 
+// 通过用户的以太坊地址获取转账记录
+function getUserTransactionRecord(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id && req.body.ethAddress){
+    dao.userDao.findTransactByUserAddress(req.body.ethAddress, function(status, result){
+      if(status === 1 && result && result[0]){
+        obj._code = '200'
+        obj._msg = '查询成功'
+        obj._data =result
+        callback(obj)
+      }else{
+        obj._code = "201";
+        obj._msg = "查询失败.";
+        obj._data = {};
+        callback(obj);
+      }
+    })
+  }else{
+    obj._code = "201";
+    obj._msg = "查询失败.";
+    obj._data = {};
+    callback(obj);
+  }
+}
+
+function getOneTransactionRecord(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+    dao.transactionrecordDao.findOneRecord(req.body.id,function(status, result){
+      if(status === 1 && result[0]){
+        obj._code = '200'
+        obj._msg = '查询成功'
+        obj._data =result[0]
+        callback(obj)
+      }else{
+        obj._code = "201";
+        obj._msg = "查询失败.";
+        obj._data = {};
+        callback(obj);
+      }
+    })
+  }else{
+    obj._code = "201";
+    obj._msg = "查询失败.";
+    obj._data = {};
+    callback(obj);
+  }
+}
 module.exports = {
   login,
   register,
@@ -501,5 +547,7 @@ module.exports = {
   getHealthCount,
   transfer,
   getBalance,
-  transferUserToUser
+  transferUserToUser,
+  getUserTransactionRecord,
+  getOneTransactionRecord
 }

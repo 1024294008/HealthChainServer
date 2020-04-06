@@ -109,10 +109,26 @@ function findByConditions(params, callback){
 
 }
 
+// 获取用户的一条交易记录
+function findOneRecord(params, callback){
+  var sql_select = 'select * from transactionrecord where id = ?'
+  conn.query(sql_select, params, function(err, result){
+    if(err){
+      console.log('[SELECT ALL RECORD ERROR] - ',err.message);
+      callback(0)
+      return;
+    }
+    console.log("查找交易记录成功")
+    callback(1, result);
+
+  })
+}
+
 module.exports = {
   insert,
   deleteByPrimaryKey,
   findByPrimaryKey,
   findByConditionsCount,
-  findByConditions
+  findByConditions,
+  findOneRecord
 }

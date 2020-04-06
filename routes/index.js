@@ -14,6 +14,9 @@ module.exports = function(app){
   app.use('/api/user/getHealthCount', require('./users/getHealthCount'))
   app.use('/api/user/getHealthDataList', require('./users/getHealthDataList'))
   app.use('/api/user/transferUserToUser', require('./users/transferUserToUser'))
+  app.use('/api/user/getUserTransactionRecord', require('./users/getUserTransactionRecord'))
+  app.use('/api/user/getOneTransactionRecord', require('./users/getOneTransactionRecord'))
+
 
   /* org路由 */
   app.use('/api/org/login', require('./org/login'))
