@@ -153,6 +153,8 @@ function getMedicalServiceList(req, callback){
           data: result
         }
       }
+      console.log("获取医疗服务列表")
+      console.log(result)
       callback(obj)
     }
     else {
