@@ -379,7 +379,6 @@ function transfer(req,callback){
               recieveAddress: receiverEthAddr,  // 接收方地址
               transactEth: value,     // 交易金额
               transactTime: dateUtil.format(new Date(), '-'),   // 交易时间
-              transactAddr: '',       // 交易地址
               transactRemarks: req.body.transactRemarks  // 备注
             }
 

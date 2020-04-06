@@ -14,8 +14,17 @@ module.exports = function(app){
   app.use('/api/user/getHealthCount', require('./users/getHealthCount'))
   app.use('/api/user/getHealthDataList', require('./users/getHealthDataList'))
   app.use('/api/user/transferUserToUser', require('./users/transferUserToUser'))
+<<<<<<< HEAD
   app.use('/api/user/getUserTransactionRecord', require('./users/getUserTransactionRecord'))
   app.use('/api/user/getOneTransactionRecord', require('./users/getOneTransactionRecord'))
+=======
+  app.use('/api/user/findRecordAndOrnInfoByUserId', require('./users/findRecordAndOrnInfoByUserId'))
+  app.use('/api/user/findBytransactRemarks', require('./users/findBytransactRemarks'))
+  app.use('/api/user/findRecordByEthAddress', require('./users/findRecordByEthAddress'))
+  app.use('/api/user/UserTransactionRecordDetail', require('./users/UserTransactionRecordDetail'))
+
+
+>>>>>>> c5644cb2687e10b67d3a193a8f67a88e2c70d2e1
 
 
   /* org路由 */
