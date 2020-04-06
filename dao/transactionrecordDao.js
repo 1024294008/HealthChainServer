@@ -109,10 +109,25 @@ function findByConditions(params, callback){
 
 }
 
+// 查找备注为购买服务的交易记录
+function findBytransactRemarks(params, callback){
+  var sql_select = "select * from transactionrecord where sendAddress = ? and transactRemarks = '购买服务' "
+  conn.query(sql_select, [params], function(err, res){
+    if(err){
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0);
+      return false;
+    }
+    console.log("查找成功")
+    callback(1, res);
+  })
+}
+
 module.exports = {
   insert,
   deleteByPrimaryKey,
   findByPrimaryKey,
   findByConditionsCount,
-  findByConditions
+  findByConditions,
+  findBytransactRemarks
 }

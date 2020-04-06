@@ -40,10 +40,28 @@ function findAllRecordsByUserid(params, callback){
     callback(1, result);
 
   })
-
 }
+
+
+// 访问时间  机构名称
+function findRecordAndOrnInfoByUserId(params, callback){
+  var sql_select = "select visitTime, organizationName from visitorrecord, organization " +
+  "where visitorrecord.visitorId = organization.id and visitorrecord.userId = ?"
+
+  conn.query(sql_select, [params], function(err, result){
+    if(err){
+      console.log('[SELECT ALL RECORD ERROR] - ',err.message);
+      callback(0)
+      return;
+    }
+    console.log("查找访客记录成功")
+    callback(1, result);
+  })
+}
+
 module.exports = {
   insert,
   findCountByUserid,
-  findAllRecordsByUserid
+  findAllRecordsByUserid,
+  findRecordAndOrnInfoByUserId
 }
