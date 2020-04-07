@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="/javascripts/echarts.min.js"></script>
+	</head>
+	<body>
+
+    <div id="uploadTimeChart" style="width: 100%;height:500px;"></div>
+
+    <script>
+
+        var result = JSON.parse('<%- JSON.stringify(healthDataList) %>')
+
+        var current_year = new Date().getFullYear(); // 当前年份
+
+        var count_month = new Array(12).fill(0); // 创建一个大小为12的数组， 默认值为0
+
+        for(var i=result.length-1; i>=0; i--){
+          var chain_year = new Date(result[i].uploadTime).getFullYear(); // 链上数据的年份
+
+          // 返回数据的年份是递增的，年份不等于当前年份即可退出循环
+          if( current_year === chain_year ){
+            var chain_month = new Date(result[i].uploadTime).getMonth; // 链上数据的月份 0~11数字
+            count_month[chain_month] += 1;  // 统计每月数据的个数
+          }
+          else{
+            break;
+          }
+        }
+
+
+        var myChart = echarts.init(document.getElementById('uploadTimeChart'));
+
+
+        option = {
+            title: {
+                text: '数据上传情况'
+            },
+            tooltip: {},
+            legend: {
+                data: ['数据实际上传情况']
+            },
+            radar: {
+                // shape: 'circle',
+                name: {
+                    textStyle: {
+                        color: '#fff',
+                        backgroundColor: '#999',
+                        borderRadius: 3,
+                        padding: [3, 5]
+                    }
+                },
+                indicator: [
+                    { name: '一月', max: 31},
+                    { name: '二月', max: 29},
+                    { name: '三月', max: 31},
+                    { name: '四月', max: 30},
+                    { name: '五月', max: 31},
+                    { name: '六月', max: 30},
+                    { name: '七月', max: 31},
+                    { name: '八月', max: 31},
+                    { name: '九月', max: 30},
+                    { name: '十月', max: 31},
+                    { name: '十一月', max: 30},
+                    { name: '十二月', max: 31},
+                ]
+            },
+            series: [{
+                name: '上传次数',
+                type: 'radar',
+                // areaStyle: {normal: {}},
+                data: [
+
+                    {
+                        value: count_month,
+                        name: '实际上传次数'
+                    }
+                ]
+            }]
+        };
+
+
+        myChart.setOption(option);
+
+    </script>
+	</body>
+</html>
