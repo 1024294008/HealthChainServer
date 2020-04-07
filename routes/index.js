@@ -18,6 +18,7 @@ module.exports = function(app){
   app.use('/api/user/findBytransactRemarks', require('./users/findBytransactRemarks'))
   app.use('/api/user/findRecordByEthAddress', require('./users/findRecordByEthAddress'))
   app.use('/api/user/UserTransactionRecordDetail', require('./users/UserTransactionRecordDetail'))
+  app.use('/api/user/sleepQualityChart', require('./users/sleepQualityChart'))
 
 
 
@@ -38,6 +39,8 @@ module.exports = function(app){
   app.use('/api/org/getBalance', require('./org/getBalance'))
   app.use('/api/org/getAllUsers', require('./org/getAllUsers'))
   app.use('/api/org/getUserAuth', require('./org/getUserAuth'))
+  app.use('/api/org/getUserHealthDataCount', require('./org/getUserHealthDataCount'))
+  app.use('/api/org/authFromUser', require('./org/authFromUser'))
 
   /* admin路由 */
   app.use('/api/admin/login', require('./admin/login'))

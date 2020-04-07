@@ -454,10 +454,6 @@ function getAllUsers(req,callback){
       "page":req.body.page,
       "limit":req.body.limit
     }
-    var ethAddress;
-    dao.orgDao.findByPrimaryKey(req.body.verify.id, function(status, result){
-      ethAddress = result[0].ethAddress
-    })
     dao.userDao.findByConditionsCount(json_getAllUsers,function(status1,result1){
       if (1===status1) {
         //说明获取到了总数,继续获取分页数据
@@ -479,22 +475,22 @@ function getAllUsers(req,callback){
             //     }
             //   })
             // }
-            for(var i = 0; i < result2.length; i ++){
-              (function(i){
-                dao.ethDao.getPublicHealthCount(result2[0].contractAddr,function(_sta,_res){
-                      console.log(_res)
-                      result2[0].sum = _res
-                    })
-                    dao.ethDao.getAuthInfo(ethAddress,result2[0].contractAddr,function(_sta,_res){
-                      if (_res>0) {
-                        result2[0].paid = "1"
-                      } else {
-                        result2[0].paid = "0"
-                      }
-                    })
+            // for(var i = 0; i < result2.length; i ++){
+            //   (function(i){
+            //     dao.ethDao.getPublicHealthCount(result2[0].contractAddr,function(_sta,_res){
+            //           console.log(_res)
+            //           result2[0].sum = _res
+            //         })
+            //         dao.ethDao.getAuthInfo(ethAddress,result2[0].contractAddr,function(_sta,_res){
+            //           if (_res>0) {
+            //             result2[0].paid = "1"
+            //           } else {
+            //             result2[0].paid = "0"
+            //           }
+            //         })
 
-              })(i)
-            }
+            //   })(i)
+            // }
             // result2.forEach(item =>{
             //   //作用域居然这么窄
             //   dao.ethDao.getPublicHealthCount(item.contractAddr,function(_sta,_res){
@@ -509,7 +505,7 @@ function getAllUsers(req,callback){
             //     }
             //   })
             // })
-            console.log(JSON.stringify(result2))
+            // console.log(JSON.stringify(result2))
             var jsonResult = {
               code:0,
               msg:'',
@@ -538,19 +534,14 @@ function getAllUsers(req,callback){
 //15 得到用户授权
 //参数：token,目标用户contractAddr，目标用户id,目标用户ethAddress
 function getUserAuth(req, callback){
-if(req.body.verify && req.body.verify.id && req.body && req.body.contractAddr){
+if(req.body.verify && req.body.verify.id && req.body && req.body.id && req.body.contractAddr && req.body.ethAddress){
   dao.orgDao.findByPrimaryKey(req.body.verify.id, function(status, result){
-    dao.ethDao.authToOrg(result[0].organizationName,result[0].privateKey,req.body.contractAddr,0.2,function(_status,_result){
-      if( 1 === status)
-      {
-        obj._code = "200";
-        obj._msg = "获取授权成功";
-        obj._data= result;
-        callback(obj);
+    dao.ethDao.authToOrg(result[0].organizationName,result[0].privateKey,req.body.contractAddr,200000000000000000,function(_status,_result){
+      if( 1 === status){
         var json_trans = {
           sendAddress:result[0].ethAddress,
           recieveAddress:req.body.ethAddress,
-          transactEth:0.2,
+          transactEth:200000000000000000,
           transactTime:Date.now(),
           transactRemarks:"机构获取授权"
         }
@@ -565,12 +556,12 @@ if(req.body.verify && req.body.verify.id && req.body && req.body.contractAddr){
             dao.visitorrecordDao.insert(json_visit,function(sta,res){
               if( 1 === status){
                 obj._code = "200";
-                obj._msg = "新增访客记录成功";
-                obj._data= {};
+                obj._msg = "授权成功！";
+                obj._data= res;
                 callback(obj);
               }else{
                 obj._code = "201";
-                obj._msg = "新增访客记录失败";
+                obj._msg = "授权失败";
                 obj._data= {};
                 callback(obj);
               }
@@ -666,10 +657,11 @@ if(req.body.verify && req.body.verify.id && req.body && req.body.ethAddress){
   })
 }}
 //17获取用户的健康数据数量
-function getUserHealthData(req,callback){
+function getUserHealthDataCount(req,callback){
 if(req.body.verify && req.body.verify.id && req.body && req.body.contractAddr){
   dao.ethDao.getPublicHealthCount(req.body.contractAddr,function(status,result){
     if( 1 === status){
+      console.log("查找到:"+result)
       obj._code = "200";
       obj._msg = "获取总数成功";
       obj._data = result;
@@ -685,25 +677,33 @@ if(req.body.verify && req.body.verify.id && req.body && req.body.contractAddr){
 }
 //18获取用户对当前机构的授权与否
 //参数：目标用户的合约地址
-function AuthFromUser(req,callback){
+function authFromUser(req,callback){
 if(req.body.verify && req.body.verify.id && req.body && req.body.contractAddr){
-  var ethAddress;
   dao.orgDao.findByPrimaryKey(req.body.verify.id, function(status, result){
-    ethAddress = result[0].ethAddress
+    dao.ethDao.getAuthInfo(result[0].ethAddress, req.body.contractAddr,function(_sta,_res){
+      console.log("这是机构拿到授权的凭证："+_res)
+      if (_sta===1) {
+        //成功获取授权状态，判断授权时间
+        if (_res>0) {
+          obj._code = "200";
+          obj._msg = "授权中";
+          obj._data = "1";
+          callback(obj);
+        }else{
+          obj._code = "200";
+          obj._msg = "未授权";
+          obj._data = "0";
+          callback(obj);
+        }
+      } else {
+        obj._code = "201";
+        obj._msg = "获取授权状态失败";
+        obj._data = "0";
+        callback(obj);
+      }
+    })
   })
-  dao.ethDao.getAuthInfo(ethAddress, req.body.contractAddr,function(_sta,_res){
-    if (_res>0) {
-      obj._code = "200";
-      obj._msg = "获取授权状态成功";
-      obj._data = "1";
-      callback(obj);
-    } else {
-      obj._code = "200";
-      obj._msg = "获取授权状态成功";
-      obj._data = "0";
-      callback(obj);
-    }
-  })
+
 }
 }
 module.exports = {
@@ -723,6 +723,6 @@ module.exports = {
   getAllUsers,
   getUserAuth,
   getAllHealthData,
-  getUserHealthData,
-  AuthFromUser
+  getUserHealthDataCount,
+  authFromUser
 }
