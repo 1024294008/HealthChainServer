@@ -56,6 +56,9 @@ function register(req, callback){
             req.body.privateKey = result.privateKey
             req.body.ethAddress = result.ethAddress
             req.body.contractAddr = result.contractAddr
+            req.body.nickname = ''
+            req.body.sex = ''
+            req.body.birth = ''
             dao.userDao.insert(req.body, function(status){
               if(1 === status){
                 obj._code = '200'
