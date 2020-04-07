@@ -21,6 +21,7 @@ module.exports = function(app){
   app.use('/api/user/distanceChart', require('./users/distanceChart'))
   app.use('/api/user/uploadTimeChart', require('./users/uploadTimeChart'))
 
+  app.use('/api/user/permitVisitChart', require('./users/permitVisitChart'))
 
 
 
