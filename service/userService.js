@@ -153,6 +153,8 @@ function getMedicalServiceList(req, callback){
           data: result
         }
       }
+      console.log("获取医疗服务列表")
+      console.log(result)
       callback(obj)
     }
     else {
@@ -544,20 +546,21 @@ function findBytransactRemarks(req, callback){
 }
 
 
-// 查询购买服务的交易记录
+// 查询交易记录
 function findRecordByEthAddress(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     var ethAddress = req.body.ethAddress;
     dao.transactionrecordDao.findByEthAddress(ethAddress, function(status, result){
-      if( 1 === status && result[0]){
+      if( 1 === status ){
         obj._code = "200";
         obj._msg = "购买服务记录查询成功..";
         obj._data = result;
+        console.log(result[0])
         callback(obj);
       }
       else{
         obj._code = "201";
-        obj._msg = "购买服务记录查询失败..";
+        obj._msg = "购买服务记录查询失败！！";
         obj._data = {};
         callback(obj);
       }
