@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+</head>
+<div id="main" style="width: 100%;height:500px;"></div>
+<body>
+  <script src="/javascripts/echarts.min.js"></script>
+  <script>
+    var healthDataList = JSON.parse('<%- JSON.stringify(healthDataList) %>');
+    var pulbicDataCount = 0
+    var privateDataCount = 0
+    healthDataList.forEach(function(value){
+      if('1' === value.permitVisit){
+        pulbicDataCount ++;
+      } else{
+        privateDataCount ++;
+      }
+    })
+    var myChart = echarts.init(document.getElementById('main'));
+    option = {
+      title: {
+        text: '用户公开数据百分比',
+        subtext: '总数据条数: ' + healthDataList.length,
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b} : {c} ({d}%)'
+      },
+      legend: {
+        left: 'center',
+        top: 'bottom',
+        data: ['隐私', '公开']
+      },
+      series: [
+        {
+          name: '健康数据',
+          type: 'pie',
+          radius: [20, 110],
+          center: ['50%', '50%'],
+          roseType: 'radius',
+          label: {
+            show: true
+          },
+          color: ['#00BFFF', '#FF9F7F'],
+          emphasis: {
+            label: {
+              show: true
+            }
+          },
+          data: [
+            { value: privateDataCount, name: '隐私' },
+            { value: pulbicDataCount, name: '公开' },
+          ]
+        }
+      ]
+    };
+
+    myChart.setOption(option);
+  </script>
+</body>
+
+</html>
