@@ -19,6 +19,7 @@ module.exports = function(app){
   app.use('/api/user/findRecordByEthAddress', require('./users/findRecordByEthAddress'))
   app.use('/api/user/UserTransactionRecordDetail', require('./users/UserTransactionRecordDetail'))
   app.use('/api/user/permitVisitChart', require('./users/permitVisitChart'))
+  app.use('/api/user/heartRateChart', require('./users/heartRateChart'))
 
 
 
