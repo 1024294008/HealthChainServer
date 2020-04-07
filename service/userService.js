@@ -292,14 +292,14 @@ function getHealthDataList(req, callback){
             callback(obj)
           } else {
             obj._code = '201'
-            obj._msg = '查询失败'
+            obj._msg = '查询失败..'
             obj._data = {}
             callback(obj)
           }
         })
       } else {
         obj._code = '201'
-        obj._msg = '查询失败'
+        obj._msg = '查询失败....'
         obj._data = {}
         callback(obj)
       }
@@ -496,7 +496,7 @@ function findRecordAndOrnInfoByUserId(req, callback){
   if(req.body && req.body.verify && req.body.verify.id){
     var id = req.body.verify.id;
     dao.visitorrecordDao.findRecordAndOrnInfoByUserId(id, function(status, result){
-      if( 1 === status && result[0]){
+      if( 1 === status){
         obj._code = "200";
         obj._msg = "访客记录查询成功..";
         obj._data = result;

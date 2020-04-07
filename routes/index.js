@@ -20,6 +20,9 @@ module.exports = function(app){
   app.use('/api/user/findBytransactRemarks', require('./users/findBytransactRemarks'))
   app.use('/api/user/findRecordByEthAddress', require('./users/findRecordByEthAddress'))
   app.use('/api/user/UserTransactionRecordDetail', require('./users/UserTransactionRecordDetail'))
+  app.use('/api/user/distanceChart', require('./users/distanceChart'))
+  app.use('/api/user/uploadTimeChart', require('./users/uploadTimeChart'))
+
   app.use('/api/user/permitVisitChart', require('./users/permitVisitChart'))
 
 
@@ -40,6 +43,9 @@ module.exports = function(app){
   app.use('/api/org/transfer', require('./org/transfer'))
   app.use('/api/org/getBalance', require('./org/getBalance'))
   app.use('/api/org/getAllUsers', require('./org/getAllUsers'))
+
+
+
 
   /* admin路由 */
   app.use('/api/admin/login', require('./admin/login'))
