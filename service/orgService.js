@@ -1,5 +1,6 @@
 var dao = require('../dao')
 var createToken = require('../middleware/createToken')
+var HealthDataList = require('../models/HealthDataList')
 var BigNumber = require("bignumber.js")
 var dateUtil = require('../utils/dateUtil')
 var obj = {
@@ -466,19 +467,50 @@ function getAllUsers(req,callback){
         dao.userDao.findByConditions(json_getAllUsers,function(status2,result2){
           if (1===status2) {
             //说明获取成功
-            for(var i = 0; i < allCount; i++){
+            // for(let i=0;i<result2.length;i++){
+            //   dao.ethDao.getPublicHealthCount(result2[i].contractAddr,function(_sta,_res){
+            //     console.log(_res)
+            //     result2[i].sum = _res
+            //   })
+            //   dao.ethDao.getAuthInfo(ethAddress,result2[i].contractAddr,function(_sta,_res){
+            //     if (_res>0) {
+            //       result2[i].paid = "1"
+            //     } else {
+            //       result2[i].paid = "0"
+            //     }
+            //   })
+            // }
+            for(var i = 0; i < result2.length; i ++){
+              (function(i){
+                dao.ethDao.getPublicHealthCount(result2[0].contractAddr,function(_sta,_res){
+                      console.log(_res)
+                      result2[0].sum = _res
+                    })
+                    dao.ethDao.getAuthInfo(ethAddress,result2[0].contractAddr,function(_sta,_res){
+                      if (_res>0) {
+                        result2[0].paid = "1"
+                      } else {
+                        result2[0].paid = "0"
+                      }
+                    })
 
-              dao.ethDao.getPublicHealthCount(result2[i].contractAddr,function(_sta,_res){
-                result2[i].sum = _res
-              })
-              dao.ethDao.getAuthInfo([ethAddress,result2[i].contractAddr],function(_sta,_res){
-                if (_res>0) {
-                  result2[i].paid = "1"
-                } else {
-                  result2[i].paid = "0"
-                }
-              })
+              })(i)
             }
+            // result2.forEach(item =>{
+            //   //作用域居然这么窄
+            //   dao.ethDao.getPublicHealthCount(item.contractAddr,function(_sta,_res){
+            //     console.log(_res)
+            //     item.sum = _res
+            //   })
+            //   dao.ethDao.getAuthInfo(ethAddress,item.contractAddr,function(_sta,_res){
+            //     if (_res>0) {
+            //       item.paid = "1"
+            //     } else {
+            //       item.paid = "0"
+            //     }
+            //   })
+            // })
+            console.log(JSON.stringify(result2))
             var jsonResult = {
               code:0,
               msg:'',
@@ -564,19 +596,117 @@ if(req.body.verify && req.body.verify.id && req.body && req.body.contractAddr){
 }
 }
 //16已经获取授权的用户直接查看用户的数据
+//参数：机构的ethAddress
 function getAllHealthData(req,callback){
-if(req.body.verify && req.body.verify.id && req.body && req.body.contractAddr){
-  //通过交易记录表查当前机构的付款记录
+if(req.body.verify && req.body.verify.id && req.body && req.body.ethAddress){
+  //通过交易记录表查当前机构的付款记录,t通过交易记录拿到已经付款的用户的列表
   dao.transactionrecordDao.findBysendAddress(req.body.ethAddress,function(status,result){
     for(var i = 0; i < result.length; i++){
-      //逐个获得用户信息
+      //扫描用户列表，逐个获得用户信息
       dao.userDao.findByEthAddress(result[i].recieveAddress,function(status1,result1){
-        //拿到了用户，逐个取数据
+        //拿到了用户信息，取出该用户的全部公开数据
+        //验证一下用户对该机构的授权情况
+        dao.ethDao.getAuthInfo([ethAddress,result2[i].contractAddr],function(_sta,_res){
+          if (_res>0) {
+            //剩余时间>0，说明已经获得授权且在授权时间内
+            dao.ethDao.getHealthCount(result1[i].contractAddr, function(status, count){
+              if(1 === status && 0 !== count){
+                var healthDataList = new HealthDataList(count)
+                healthDataList.on('dataAccepted', function(list){   // 当监听接收的数据量达到count时(或者超时)触发此事件
+                  obj._code = '200'
+                  obj._msg = '查询成功'
+                  obj._data = list
+                  callback(obj)
+                })
+                for(var i = 0; i < count; i ++){
+                  (function(i){                   // 闭包
+                    dao.ethDao.getHDataByIndex(i, req.body.ethAddress, result1[i].contractAddr, function(status, result){
+                      if(1 === status){
+                        // 去掉冗余的字段
+                        delete result[0]
+                        delete result[1]
+                        delete result[2]
+                        delete result[3]
+                        delete result[4]
+                        delete result[5]
+                        delete result[6]
+                        result['index'] = i
+                        healthDataList.addHealthData(result)
+                      } else {
+                        healthDataList.addHealthData({
+                          "heartRate": "",
+                          "heat": "",
+                          "sleepQuality": "",
+                          "distance": "",
+                          "evaluation": "",
+                          "uploadTime": "",
+                          "permitVisit": 0,
+                          "index": -1
+                        })
+                      }
+                    })
+                  })(i)
+                }
+              } else if(1 === status && 0 === count){
+                obj._code = '202'
+                obj._msg = '无数据'
+                obj._data = {}
+                callback(obj)
+              } else {
+                obj._code = '201'
+                obj._msg = '查询失败'
+                obj._data = {}
+                callback(obj)
+              }
+            })
+          }
+        })
 
       })
     }
   })
 }}
+//17获取用户的健康数据数量
+function getUserHealthData(req,callback){
+if(req.body.verify && req.body.verify.id && req.body && req.body.contractAddr){
+  dao.ethDao.getPublicHealthCount(req.body.contractAddr,function(status,result){
+    if( 1 === status){
+      obj._code = "200";
+      obj._msg = "获取总数成功";
+      obj._data = result;
+      callback(obj);
+    }else{
+      obj._code = "201";
+      obj._msg = "获取总数失败..";
+      obj._data = {};
+      callback(obj);
+    }
+  })
+}
+}
+//18获取用户对当前机构的授权与否
+//参数：目标用户的合约地址
+function AuthFromUser(req,callback){
+if(req.body.verify && req.body.verify.id && req.body && req.body.contractAddr){
+  var ethAddress;
+  dao.orgDao.findByPrimaryKey(req.body.verify.id, function(status, result){
+    ethAddress = result[0].ethAddress
+  })
+  dao.ethDao.getAuthInfo(ethAddress, req.body.contractAddr,function(_sta,_res){
+    if (_res>0) {
+      obj._code = "200";
+      obj._msg = "获取授权状态成功";
+      obj._data = "1";
+      callback(obj);
+    } else {
+      obj._code = "200";
+      obj._msg = "获取授权状态成功";
+      obj._data = "0";
+      callback(obj);
+    }
+  })
+}
+}
 module.exports = {
   login,
   register,
@@ -593,5 +723,7 @@ module.exports = {
   getBalance,
   getAllUsers,
   getUserAuth,
-  getAllHealthData
+  getAllHealthData,
+  getUserHealthData,
+  AuthFromUser
 }
