@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="/public/javascripts/echarts.min.js"></script>
+	</head>
+	<body>
+
+    <div id="distanceChart" style="width: 100%;height:500px;"></div>
+
+    <script type="text/javascript">
+
+        var result = JSON.parse(JSON.stringify('<%- healthDataList %>'))
+
+        var time = [];
+        var distance = []
+
+        for(var i=0; i<result.length; i++){
+          time.push(result[i].uploadTime);
+          distance.push(result[i].distance)
+        }
+
+        var myChart = echarts.init(document.getElementById('distanceChart'));
+
+        option = {
+            xAxis: {
+                type: '日期',
+                data: time
+            },
+            yAxis: {
+                type: '步数'
+            },
+            series: [{
+                data: distance,
+                type: 'line'
+            }]
+        };
+
+        myChart.setOption(option);
+
+    </script>
+	</body>
+</html>
