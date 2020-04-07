@@ -653,6 +653,8 @@ function updateMedicalServcie(req, callback){
 
 // 获取区块信息
 function getBlockInfo(req, callback){
+    console.log("区块信息")
+    console.log(req.query)
     if(req.query && req.query.num){
       dao.adminEthDao.getBlockInfo(req.query.num, function(status, result){
         if(1 === status){
