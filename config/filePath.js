@@ -1,4 +1,4 @@
 module.exports = {
-  filePath: "E:/Zink/file/"
-  ,imagePath:"E:/Zink/image/"
+  filePath: "F:/Zink/file/"
+  ,imagePath:"F:/Zink/image/"
 }
