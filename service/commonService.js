@@ -269,6 +269,7 @@ function getServiceAndOrg(req, callback){
         obj._code = '200'
         obj._msg = '查找成功'
         obj._data.serviceAndOrgInfo = result[0]
+        console.log(obj)
         callback(obj)
       }else{
         obj._code = '201'

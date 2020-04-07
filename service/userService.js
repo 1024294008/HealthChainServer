@@ -153,6 +153,8 @@ function getMedicalServiceList(req, callback){
           data: result
         }
       }
+      console.log("获取医疗服务列表")
+      console.log(result)
       callback(obj)
     }
     else {
@@ -445,7 +447,6 @@ function transferUserToUser(req, callback){
                   recieveAddress: receiverEthAddr,  // 接收方地址
                   transactEth: value,     // 交易金额
                   transactTime: dateUtil.format(new Date(), '-'),   // 交易时间
-                  transactAddr: '',       // 交易地址
                   transactRemarks: req.body.transactRemarks  // 备注
 
                 }
@@ -490,6 +491,115 @@ function transferUserToUser(req, callback){
   }
 }
 
+// 查询机构访问的时间和机构名称
+function findRecordAndOrnInfoByUserId(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+    var id = req.body.verify.id;
+    dao.visitorrecordDao.findRecordAndOrnInfoByUserId(id, function(status, result){
+      if( 1 === status && result[0]){
+        obj._code = "200";
+        obj._msg = "访客记录查询成功..";
+        obj._data = result;
+        callback(obj);
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "访客记录查询失败..";
+        obj._data = {};
+        callback(obj);
+      }
+    })
+  }
+  else{
+    obj._code = "201";
+    obj._msg = "访客记录查询失败......";
+    obj._data = {};
+    callback(obj);
+  }
+}
+
+// 查询购买服务的交易记录
+function findBytransactRemarks(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+    var sendAddress = req.body.ethAddress;
+    dao.transactionrecordDao.findBytransactRemarks(sendAddress, function(status, result){
+      if( 1 === status && result[0]){
+        obj._code = "200";
+        obj._msg = "购买服务记录查询成功..";
+        obj._data = result;
+        callback(obj);
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "购买服务记录查询失败..";
+        obj._data = result;
+        callback(obj);
+      }
+    })
+  }
+  else{
+    obj._code = "201";
+    obj._msg = "购买服务记录查询失败....";
+    obj._data = result;
+    callback(obj);
+  }
+}
+
+
+// 查询交易记录
+function findRecordByEthAddress(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+    var ethAddress = req.body.ethAddress;
+    dao.transactionrecordDao.findByEthAddress(ethAddress, function(status, result){
+      if( 1 === status ){
+        obj._code = "200";
+        obj._msg = "购买服务记录查询成功..";
+        obj._data = result;
+        console.log(result[0])
+        callback(obj);
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "购买服务记录查询失败！！";
+        obj._data = {};
+        callback(obj);
+      }
+    })
+  }
+  else{
+    obj._code = "201";
+    obj._msg = "购买服务记录查询失败....";
+    obj._data = {};
+    callback(obj);
+  }
+}
+
+function UserTransactionRecordDetail(req, callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+    var id = req.body.id;
+    dao.transactionrecordDao.findByPrimaryKey(id, function(status, result){
+      if( 1 === status){
+        obj._code = "200";
+        obj._msg = "交易记录详情查询成功..";
+        obj._data = result;
+        callback(obj);
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "交易记录详情查询失败..";
+        obj._data = result;
+        callback(obj);
+      }
+    })
+  }
+  else{
+    obj._code = "201";
+    obj._msg = "交易记录详情查询失败..";
+    obj._data = result;
+    callback(obj);
+  }
+}
+
 module.exports = {
   login,
   register,
@@ -501,5 +611,9 @@ module.exports = {
   getHealthCount,
   transfer,
   getBalance,
-  transferUserToUser
+  transferUserToUser,
+  findRecordAndOrnInfoByUserId,
+  findBytransactRemarks,
+  findRecordByEthAddress,
+  UserTransactionRecordDetail
 }
