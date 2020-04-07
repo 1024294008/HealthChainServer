@@ -109,7 +109,6 @@ function findByConditions(params, callback){
 
 }
 
-<<<<<<< HEAD
 // 获取用户的一条交易记录
 function findOneRecord(params, callback){
   var sql_select = 'select * from transactionrecord where id = ?'
@@ -121,8 +120,9 @@ function findOneRecord(params, callback){
     }
     console.log("查找交易记录成功")
     callback(1, result);
+  })
+}
 
-=======
 // 查找备注为购买服务的交易记录
 function findBytransactRemarks(params, callback){
   var sql_select = "select * from transactionrecord where sendAddress = ? and transactRemarks = '购买服务' "
@@ -148,7 +148,6 @@ function findByEthAddress(params, callback){
     }
     console.log("查找成功")
     callback(1, res);
->>>>>>> c5644cb2687e10b67d3a193a8f67a88e2c70d2e1
   })
 }
 
@@ -158,10 +157,8 @@ module.exports = {
   findByPrimaryKey,
   findByConditionsCount,
   findByConditions,
-<<<<<<< HEAD
-  findOneRecord
-=======
+  findOneRecord,
   findBytransactRemarks,
   findByEthAddress
->>>>>>> c5644cb2687e10b67d3a193a8f67a88e2c70d2e1
 }
+
