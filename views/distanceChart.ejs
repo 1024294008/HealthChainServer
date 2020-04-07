@@ -11,7 +11,7 @@
 
     <script>
 
-        var result = JSON.parse(JSON.stringify('<%- healthDataList %>'))
+        var result = JSON.parse('<%- JSON.stringify(healthDataList) %>')
 
         var time = [];
         var distance = [];
