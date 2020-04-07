@@ -178,3 +178,8 @@ module.exports = {
     transfer,
     getBalance
 }
+
+// getHealthCount('0xf33dBfF92608d3a8790d6cFDb539aabFCf46832d', function(status, result){
+//   console.log(status)
+//   console.log(result)
+// })
