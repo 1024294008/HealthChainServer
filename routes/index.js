@@ -24,11 +24,8 @@ module.exports = function(app){
   app.use('/api/user/uploadTimeChart', require('./users/uploadTimeChart'))
 
   app.use('/api/user/permitVisitChart', require('./users/permitVisitChart'))
-<<<<<<< HEAD
   app.use('/api/user/sleepQualityChart', require('./users/sleepQualityChart'))
-=======
   app.use('/api/user/heartRateChart', require('./users/heartRateChart'))
->>>>>>> hupeng
 
 
 
