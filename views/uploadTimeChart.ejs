@@ -1,89 +1,126 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-    <title></title>
-    <script type="text/javascript" src="/javascripts/echarts.min.js"></script>
-	</head>
-	<body>
 
-    <div id="uploadTimeChart" style="width: 100%;height:500px;"></div>
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <script type="text/javascript" src="/javascripts/echarts.min.js"></script>
+</head>
 
-    <script>
+<body>
 
-        var result = JSON.parse('<%- JSON.stringify(healthDataList) %>')
+  <div id="uploadTimeChart" style="width: 100%;height:500px;"></div>
 
-        var current_year = new Date().getFullYear(); // 当前年份
+  <script>
 
-        var count_month = new Array(12).fill(0); // 创建一个大小为12的数组， 默认值为0
+    var result = JSON.parse('<%- JSON.stringify(healthDataList) %>')
 
-        for(var i=result.length-1; i>=0; i--){
-          var chain_year = new Date(result[i].uploadTime).getFullYear(); // 链上数据的年份
+    var date = new Date()
+    var nowTime = format(new Date(), '-')                       // 获取当前的时间
+    date.setFullYear(date.getFullYear() - 1)                      // 减去一年的时间
+    var lastYearTime = format(date, '-')                        // 获取一年之前的时间
 
-          // 返回数据的年份是递增的，年份不等于当前年份即可退出循环
-          if( current_year === chain_year ){
-            var chain_month = new Date(result[i].uploadTime).getMonth; // 链上数据的月份 0~11数字
-            count_month[chain_month] += 1;  // 统计每月数据的个数
-          }
-          else{
-            break;
-          }
+    var startMonth = lastYearTime.substring(0, 7)
+    var endMonth = nowTime.substring(0, 7)
+    var countMouth = {    // 记录每个月的健康数据条数
+
+    }
+    result.forEach(function (value) {
+      time = value.uploadTime.substring(0, 7)
+      if (time >= startMonth && time <= endMonth) {
+        if (time in countMouth) {
+          countMouth[time] += 1
+        } else {
+          countMouth[time] = 0
         }
+      }
+    })
+    var data = new Array(13).fill(0)
+    for (key in countMouth) {
+      data[parseInt(key.substring(5, 7))] = countMouth[key]
+    }
+    data.shift()
+    var maxcount = 0  // 记录一个月的最大上传数
+    data.forEach(function (value) {
+      if (value > maxcount)
+        maxcount = value
+    })
+
+    var myChart = echarts.init(document.getElementById('uploadTimeChart'));
 
 
-        var myChart = echarts.init(document.getElementById('uploadTimeChart'));
+    option = {
+      title: {
+        text: '最近一年数据上传情况',
+        left: 'center'
+      },
+      tooltip: {},
+      legend: {
+        data: ['预算分配（Allocated Budget）', '实际开销（Actual Spending）']
+      },
+      radar: {
+        // shape: 'circle',
+        name: {
+          textStyle: {
+            color: '#fff',
+            backgroundColor: '#999',
+            borderRadius: 3,
+            padding: [3, 5]
+          }
+        },
+        indicator: [
+          { name: '一月', max: maxcount },
+          { name: '二月', max: maxcount },
+          { name: '三月', max: maxcount },
+          { name: '四月', max: maxcount },
+          { name: '五月', max: maxcount },
+          { name: '六月', max: maxcount },
+          { name: '七月', max: maxcount },
+          { name: '八月', max: maxcount },
+          { name: '九月', max: maxcount },
+          { name: '十月', max: maxcount },
+          { name: '十一月', max: maxcount },
+          { name: '十二月', max: maxcount },
+        ]
+      },
+      series: [{
+        type: 'radar',
+        data: [
+          {
+            value: data,
+          }
+        ]
+      }]
+    };
 
+    myChart.setOption(option);
 
-        option = {
-            title: {
-                text: '数据上传情况'
-            },
-            tooltip: {},
-            legend: {
-                data: ['数据实际上传情况']
-            },
-            radar: {
-                // shape: 'circle',
-                name: {
-                    textStyle: {
-                        color: '#fff',
-                        backgroundColor: '#999',
-                        borderRadius: 3,
-                        padding: [3, 5]
-                    }
-                },
-                indicator: [
-                    { name: '一月', max: 31},
-                    { name: '二月', max: 29},
-                    { name: '三月', max: 31},
-                    { name: '四月', max: 30},
-                    { name: '五月', max: 31},
-                    { name: '六月', max: 30},
-                    { name: '七月', max: 31},
-                    { name: '八月', max: 31},
-                    { name: '九月', max: 30},
-                    { name: '十月', max: 31},
-                    { name: '十一月', max: 30},
-                    { name: '十二月', max: 31},
-                ]
-            },
-            series: [{
-                name: '上传次数',
-                type: 'radar',
-                // areaStyle: {normal: {}},
-                data: [
+    // 时间格式化
+    function format(Date, str) {
+      var obj = {
+        Y: Date.getFullYear(),
+        M: Date.getMonth() + 1,
+        D: Date.getDate(),
+        H: Date.getHours(),
+        Mi: Date.getMinutes(),
+        S: Date.getSeconds()
+      }
+      // 拼接时间 hh:mm:ss
+      var time = ' ' + supplement(obj.H) + ':' + supplement(obj.Mi) + ':' + supplement(obj.S);
+      // yyyy-mm-dd
+      if (str.indexOf('-') > -1) {
+        return obj.Y + '-' + supplement(obj.M) + '-' + supplement(obj.D) + time;
+      }
+      // yyyy/mm/dd
+      if (str.indexOf('/') > -1) {
+        return obj.Y + '/' + supplement(obj.M) + '/' + supplement(obj.D) + time;
+      }
+    }
+    // 位数不足两位补全0
+    function supplement(nn) {
+      return nn = nn < 10 ? '0' + nn : nn;
+    }
+  </script>
+</body>
 
-                    {
-                        value: count_month,
-                        name: '实际上传次数'
-                    }
-                ]
-            }]
-        };
-
-
-        myChart.setOption(option);
-
-    </script>
-	</body>
 </html>
