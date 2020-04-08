@@ -254,6 +254,13 @@ function getHealthDataList(req, callback){
             healthDataList.on('dataAccepted', function(list){   // 当监听接收的数据量达到count时(或者超时)触发此事件
               obj._code = '200'
               obj._msg = '查询成功'
+              list.sort(function(obj1, obj2){
+                if(obj1.uploadTime < obj2.uploadTime){
+                  return 1
+                } else {
+                  return -1
+                }
+              })
               obj._data = list
               callback(obj)
             })
