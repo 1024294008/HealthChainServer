@@ -47,18 +47,12 @@ function register(req, callback){
     dao.userDao.findByAccount(req.body.account, function(status, result){
 
       if(1 === status && !result[0]){
-        console.log("zh---")
         // 生成私钥、地址、初始化智能合约
         dao.ethDao.createAccout(function(status, result){
-          console.log("准备以太坊信息")
-          console.log(result)
           if(1 == status){
             req.body.privateKey = result.privateKey
             req.body.ethAddress = result.ethAddress
             req.body.contractAddr = result.contractAddr
-            req.body.nickname = ''
-            req.body.sex = ''
-            req.body.birth = ''
             dao.userDao.insert(req.body, function(status){
               if(1 === status){
                 obj._code = '200'
@@ -67,21 +61,21 @@ function register(req, callback){
                 callback(obj)
               } else {
                 obj._code = '201'
-                obj._msg = '注册失败1'
+                obj._msg = '注册失败'
                 obj._data = {}
                 callback(obj)
               }
             })
           } else {
             obj._code = '201'
-            obj._msg = '注册失败2'
+            obj._msg = '注册失败'
             obj._data = {}
             callback(obj)
           }
         })
       } else {
         obj._code = '201'
-        obj._msg = '注册失败3'
+        obj._msg = '注册失败'
         obj._data = {}
         callback(obj)
       }
