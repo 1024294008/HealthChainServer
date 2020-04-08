@@ -26,6 +26,7 @@ module.exports = function(app){
   app.use('/api/user/uploadTimeChart', require('./users/uploadTimeChart'))
 
   app.use('/api/user/permitVisitChart', require('./users/permitVisitChart'))
+  app.use('/api/user/heartRateChart', require('./users/heartRateChart'))
 
 
 >>>>>>> c5644cb2687e10b67d3a193a8f67a88e2c70d2e1

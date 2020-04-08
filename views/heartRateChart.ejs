@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+</head>
+<div id="main" style="width: 100%;height:400px;"></div>
+
+<body>
+  <script src="/javascripts/echarts.min.js"></script>
+  <script>
+    var healthDataList = JSON.parse('<%- JSON.stringify(healthDataList) %>')
+    var date = new Date()
+    var nowTime = format(new Date(), '-')                       // 获取当前的时间
+    date.setTime(date.getTime() - 7 * 24 * 60 * 60 * 1000)      // 减去一周的时间
+    var lastWeekTime = format(date, '-')                        // 获取一周之前的时间
+
+    var myHealthDataList = healthDataList.filter(function (value) {               // 过滤出这一周的数据
+      return (value.uploadTime <= nowTime) && (value.uploadTime >= lastWeekTime)
+    })
+
+    myHealthDataList = myHealthDataList.map(function (value) {    // 数据格式化
+      return [value.uploadTime.split(' ')[0], parseInt(value.heartRate)]
+    })
+
+
+    var myChart = echarts.init(document.getElementById('main'));
+    option = {
+      title: {
+        text: '最近一周心率变化',
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'axis'
+      },
+      xAxis: {
+        data: myHealthDataList.map(function (item) {
+          return item[0];
+        })
+      },
+      yAxis: {
+        min: 30,
+        max: 130,
+        splitLine: {
+          show: false
+        }
+      },
+      dataZoom: [{
+        startValue: lastWeekTime.split[0]
+      }, {
+        type: 'inside'
+      }],
+      visualMap: {
+        top: 10,
+        right: 10,
+        pieces: [{
+          gt: 30,
+          lte: 60,
+          color: '#ffde33'
+        }, {
+          gt: 60,
+          lte: 75,
+          color: '#ff9933'
+        }, {
+          gt: 75,
+          lte: 100,
+          color: '#cc0033'
+        }, {
+          gt: 100,
+          lte: 130,
+          color: '#660099'
+        }]
+      },
+      series: {
+        name: '心率',
+        type: 'line',
+        data: myHealthDataList.map(function (item) {
+          return item[1];
+        }),
+        markLine: {
+          silent: true,
+          data: [{
+            yAxis: 100
+          },
+          {
+            yAxis: 75
+          },
+          {
+            yAxis: 60
+          }]
+        }
+      }
+    }
+
+    myChart.setOption(option);
+
+    // 时间格式化
+    function format(Date, str) {
+      var obj = {
+        Y: Date.getFullYear(),
+        M: Date.getMonth() + 1,
+        D: Date.getDate(),
+        H: Date.getHours(),
+        Mi: Date.getMinutes(),
+        S: Date.getSeconds()
+      }
+      // 拼接时间 hh:mm:ss
+      var time = ' ' + supplement(obj.H) + ':' + supplement(obj.Mi) + ':' + supplement(obj.S);
+      // yyyy-mm-dd
+      if (str.indexOf('-') > -1) {
+        return obj.Y + '-' + supplement(obj.M) + '-' + supplement(obj.D) + time;
+      }
+      // yyyy/mm/dd
+      if (str.indexOf('/') > -1) {
+        return obj.Y + '/' + supplement(obj.M) + '/' + supplement(obj.D) + time;
+      }
+    }
+    // 位数不足两位补全0
+    function supplement(nn) {
+      return nn = nn < 10 ? '0' + nn : nn;
+    }
+  </script>
+</body>
+
+</html>
