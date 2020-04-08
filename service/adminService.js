@@ -962,9 +962,9 @@ function getWalletInfo(req, callback){
   }
 }
 
-// root用户向管理员转账
+// 管理员转账，   可以向用户、机构、管路员转账
 function transferToUser(req, callback){
-  if(req.body && req.body.verify && req.body.verify.id && req.body.verify.id === 1){
+  if(req.body && req.body.verify && req.body.verify.id ){
     var receiverEthAddr = req.body.receiverEthAddr;
     var value = new BigNumber(req.body.value);
     dao.ethDao.transferToUser(receiverEthAddr, value, function(status){
