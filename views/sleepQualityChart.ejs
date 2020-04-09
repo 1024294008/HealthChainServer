@@ -4,26 +4,29 @@
     <script src="/javascripts/echarts.min.js"></script>
   </head>
   <body>
-    <div id="main" style="width: 600px;height:400px;"></div>
+    <div id="main" style="width: 100%;height:400px;"></div>
   </body>
 </html>
 <script type="text/javascript">
- var myChart = echarts.init(document.getElementById('main'));
-var xAxisData = [];
-var data1 = [];
-var data2 = [];
-for (var i = 0; i < 100; i++) {
-    xAxisData.push('类目' + i);
-    data1.push((Math.sin(i / 5) * (i / 5 -10) + i / 6) * 5);
-    // data2.push((Math.cos(i / 5) * (i / 5 -10) + i / 6) * 5);
-}
+  var myChart = echarts.init(document.getElementById('main'));
 
-option = {
+  var result = JSON.parse('<%- JSON.stringify(healthDataList) %>')
+
+  var uploadTime = [];
+  var sleepQuality = [];
+
+  for (var i = 0; i < 14; i++) {
+    uploadTime.push(result[i].uploadTime.substring(5,10)+"日");
+    sleepQuality.push(result[i].sleepQuality.split("小时")[0]);
+  }
+
+  option = {
     title: {
-        text: '柱状图动画延迟'
+        text: '最近14天睡眠时长',
+        subtext: '正常成人区间：6-8'
     },
     legend: {
-        data: ['bar', 'bar2']
+        data: ['bar']
     },
     toolbox: {
         // y: 'bottom',
@@ -39,7 +42,7 @@ option = {
     },
     tooltip: {},
     xAxis: {
-        data: xAxisData,
+        data: uploadTime,
         splitLine: {
             show: false
         }
@@ -47,18 +50,11 @@ option = {
     yAxis: {
     },
     series: [{
-        name: 'bar',
+        name: '睡眠时长',
         type: 'bar',
-        data: data1,
+        data: sleepQuality,
         animationDelay: function (idx) {
             return idx * 10;
-        }
-    }, {
-        name: 'bar2',
-        type: 'bar',
-        data: data2,
-        animationDelay: function (idx) {
-            return idx * 10 + 100;
         }
     }],
     animationEasing: 'elasticOut',

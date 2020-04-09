@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="/javascripts/echarts.min.js"></script>
+  </head>
+  <body>
+    <div id="main" style="width: 100%;height:400px;"></div>
+  </body>
+</html>
+<script type="text/javascript">
+  var myChart = echarts.init(document.getElementById('main'));
+
+  var result = JSON.parse('<%- JSON.stringify(healthDataList) %>')
+
+  var uploadTime = [];
+  var heat = [];
+
+  for (var i = 0; i < 14; i++) {
+    uploadTime.push(result[i].uploadTime.substring(5,10)+"日");
+    heat.push(result[i].heat.split("卡路里")[0]);
+  }
+
+  option = {
+    title: {
+        text: '最近14天热量消耗',
+        subtext: '正常成人区间：2000-3500'
+    },
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'shadow'
+        }
+    },
+    legend: {
+        data: ['2020年']
+    },
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis: {
+        type: 'value',
+        boundaryGap: [0, 0.01]
+    },
+    yAxis: {
+        type: 'category',
+        data: uploadTime
+    },
+    series: [
+        {
+            name: '2020年',
+            type: 'bar',
+            data: heat
+        }
+
+    ]
+};
+
+myChart.setOption(option);
+</script>
