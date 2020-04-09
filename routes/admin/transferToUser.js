@@ -8,7 +8,7 @@ var dao = require('../../dao')
 var checktoken = require('../../middleware/checkToken')
 
 router.post('/', checktoken, function(req, res, next){
-  service.adminService.transfer(req, function(result){
+  service.adminService.transferToUser(req, function(result){
     res.json(result)
   })
 })
