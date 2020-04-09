@@ -48,7 +48,7 @@ module.exports = function(app){
   app.use('/api/org/getUserAuth', require('./org/getUserAuth'))
   app.use('/api/org/getUserHealthDataCount', require('./org/getUserHealthDataCount'))
   app.use('/api/org/authFromUser', require('./org/authFromUser'))
-
+  app.use('/api/org/getTransferHistory', require('./org/getTransferHistory'))
 
 
 
