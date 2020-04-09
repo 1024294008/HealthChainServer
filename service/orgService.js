@@ -536,7 +536,8 @@ function getUserAuth(req, callback){
 if(req.body.verify && req.body.verify.id && req.body && req.body.id && req.body.contractAddr && req.body.ethAddress){
   dao.orgDao.findByPrimaryKey(req.body.verify.id, function(status, result){
     dao.ethDao.authToOrg(result[0].organizationName,result[0].privateKey,req.body.contractAddr,200000000000000000,function(_status,_result){
-      if( 1 === status){
+      console.log("授权状态："+_status)
+      if( 1 === _status){
         var json_trans = {
           sendAddress:result[0].ethAddress,
           recieveAddress:req.body.ethAddress,
@@ -545,7 +546,7 @@ if(req.body.verify && req.body.verify.id && req.body && req.body.id && req.body.
           transactRemarks:"机构获取授权"
         }
         dao.transactionrecordDao.insert(json_trans,function(status_,result_){
-          if( 1 === status)
+          if( 1 === status_)
           {
             var json_visit = {
               userId:req.body.id,
@@ -553,7 +554,7 @@ if(req.body.verify && req.body.verify.id && req.body && req.body.id && req.body.
               visitTime:Date.now()
             }
             dao.visitorrecordDao.insert(json_visit,function(sta,res){
-              if( 1 === status){
+              if( 1 === sta){
                 obj._code = "200";
                 obj._msg = "授权成功！";
                 obj._data= res;

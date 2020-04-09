@@ -395,6 +395,7 @@ function updateOrgInfo(req, callback){
     if(req.body.certificateResult === '审核通过'){
       params = {
         certificateResult: req.body.certificateResult
+        ,type:"医疗"
       }
     }
     // 如果审核未通过
