@@ -22,7 +22,7 @@ module.exports = function(app){
   app.use('/api/user/UserTransactionRecordDetail', require('./users/UserTransactionRecordDetail'))
   app.use('/api/user/distanceChart', require('./users/distanceChart'))
   app.use('/api/user/uploadTimeChart', require('./users/uploadTimeChart'))
-
+  app.use('/api/user/heatChart', require('./users/heatChart'))
   app.use('/api/user/permitVisitChart', require('./users/permitVisitChart'))
   app.use('/api/user/sleepQualityChart', require('./users/sleepQualityChart'))
   app.use('/api/user/heartRateChart', require('./users/heartRateChart'))
