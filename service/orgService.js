@@ -536,7 +536,8 @@ function getUserAuth(req, callback){
 if(req.body.verify && req.body.verify.id && req.body && req.body.id && req.body.contractAddr && req.body.ethAddress){
   dao.orgDao.findByPrimaryKey(req.body.verify.id, function(status, result){
     dao.ethDao.authToOrg(result[0].organizationName,result[0].privateKey,req.body.contractAddr,200000000000000000,function(_status,_result){
-      if( 1 === status){
+      console.log("授权状态："+_status)
+      if( 1 === _status){
         var json_trans = {
           sendAddress:result[0].ethAddress,
           recieveAddress:req.body.ethAddress,
@@ -545,15 +546,15 @@ if(req.body.verify && req.body.verify.id && req.body && req.body.id && req.body.
           transactRemarks:"机构获取授权"
         }
         dao.transactionrecordDao.insert(json_trans,function(status_,result_){
-          if( 1 === status)
+          if( 1 === status_)
           {
             var json_visit = {
               userId:req.body.id,
               visitorId:req.body.verify.id,
-              visitTime:Date.now()
+              visitTime:dateUtil.format(new Date(), '-')
             }
             dao.visitorrecordDao.insert(json_visit,function(sta,res){
-              if( 1 === status){
+              if( 1 === sta){
                 obj._code = "200";
                 obj._msg = "授权成功！";
                 obj._data= res;
@@ -705,6 +706,59 @@ if(req.body.verify && req.body.verify.id && req.body && req.body.contractAddr){
 
 }
 }
+//19得到机构的转账记录
+function getTransferHistory(req,callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+    dao.orgDao.findByPrimaryKey(req.body.verify.id, function(status, result){
+      var params = {
+        sendAddress: result[0].ethAddress,
+        recieveAddress: result[0].ethAddress,
+        limit: req.body.limit,
+        page: req.body.page
+      }
+      dao.transactionrecordDao.findByConditionsCount(params, function(status, result){
+        if( 1=== status && result[0]){
+          var res_json = {
+            code: 0,
+            msg: '',
+            count: 0,
+            data: []
+          }
+          res_json.count = result[0].allCount;
+          dao.transactionrecordDao.findBysendAddressOrrecieveAddress(params, function(st, re){
+            if( 1=== st && re[0]){
+              // objList._data.dataList.data = re;
+              // callback(objList);
+
+              res_json.data = re;
+
+              callback(res_json);
+            }
+            else {
+              obj._code = "201";
+              obj._msg = "查找失败";
+              obj._data = {};
+              callback(obj);
+            }
+          });
+
+        }
+        else {
+          obj._code = "201";
+          obj._msg = "查找失败";
+          obj._data = {};
+          callback(obj);
+        }
+      });
+    });
+  }
+  else{
+    obj._code = "201";
+    obj._msg = "查找失败..";
+    obj._data = {};
+    callback(obj);
+  }
+}
 module.exports = {
   login,
   register,
@@ -723,5 +777,6 @@ module.exports = {
   getUserAuth,
   getAllHealthData,
   getUserHealthDataCount,
-  authFromUser
+  authFromUser,
+  getTransferHistory
 }

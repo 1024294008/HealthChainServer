@@ -107,7 +107,7 @@ function authToOrg(organizationName, privateKey, contractAddr, value, callback) 
   }
   // 对原生交易进行签名并发送
   account.signTransaction(tx).then(function (result) {
-    web3.eth.sendSignedTransaction(result.rawTransaction.toString('hex'), function () { callback(1) }, function () { callback(0) })
+    web3.eth.sendSignedTransaction(result.rawTransaction.toString('hex')).then(function () { callback(1) }, function () { callback(0) })
   }, function () { callback(0) })
 }
 
