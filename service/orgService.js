@@ -105,7 +105,7 @@ function updateOrgInfo(req, callback){
         }
       }else{
         json_updateOrgInfo = {
-          portrait:req.body.portrait,
+          pic:req.body.portrait,
           organizationName:req.body.organizationName,
           introduction:req.body.introduction,
           account:req.body.account
