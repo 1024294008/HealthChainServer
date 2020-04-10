@@ -583,14 +583,29 @@ function findRecordByEthAddress(req, callback){
 }
 
 function UserTransactionRecordDetail(req, callback){
-  if(req.body && req.body.verify && req.body.verify.id){
+  if(req.body && req.body.verify && req.body.verify.id && req.body.ethAddress){
     var id = req.body.id;
     dao.transactionrecordDao.findByPrimaryKey(id, function(status, result){
-      if( 1 === status){
-        obj._code = "200";
-        obj._msg = "交易记录详情查询成功..";
-        obj._data = result;
-        callback(obj);
+      if( 1 === status && result[0]){
+        if(req.body.ethAddress === result[0].sendAddress){
+          result[0].oppositeAddress = result[0].recieveAddress
+        } else {
+          result[0].oppositeAddress = result[0].sendAddress
+        }
+        dao.userDao.findByEthAddress(result[0].oppositeAddress, function(status1, result1){
+          if(1 === status1 && result1[0]){
+            result[0].account = result1[0].account
+            obj._code = "200";
+            obj._msg = "交易记录详情查询成功..";
+            obj._data = result[0];
+            callback(obj);
+          } else {
+            obj._code = "201";
+            obj._msg = "交易记录详情查询失败..";
+            obj._data = result;
+            callback(obj);
+          }
+        })
       }
       else{
         obj._code = "201";
