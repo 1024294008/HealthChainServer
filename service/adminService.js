@@ -583,7 +583,7 @@ function findMedicalServiceList(req, callback){
               obj._code = "201";
               obj._msg = "查找失败..";
               obj._data = {};
-              callback(obj);
+              callback(res_json);
             }
           })
         }
