@@ -6,9 +6,7 @@ var checkToken = require('../../middleware/checkToken')
 
 router.post('/', checkToken, function(req, res, next){
   service.userService.getHealthDataList(req, function(result){
-    console.log(result)
-    res.render('uploadTimeChart', {healthDataList: result._data});
+    res.render('heatChart',{healthDataList:result._data})
   })
 })
-
 module.exports = router

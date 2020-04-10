@@ -47,6 +47,37 @@ function findByPrimaryKey(params, callback){
   })
 }
 
+//参数发送者ethAddress
+function findBysendAddress(params, callback){
+  var sql_select = "select * from transactionrecord where 1 = 1 and sendAddress = ?"
+
+  conn.query(sql_select, [params], function(err, res){
+    if(err){
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0);
+      return false;
+    }
+    console.log("查找成功");
+    callback(1, res);
+  })
+}
+
+//参数发送者ethAddress or recieveAddress
+function findBysendAddressOrrecieveAddress(params, callback){
+  var sql_select = "select * from transactionrecord where 1 = 1 and sendAddress = ? or recieveAddress = ? "
+  sql_select += 'limit ' + params.limit*(params.page-1) + ',' + params.limit
+
+  conn.query(sql_select, [params.sendAddress,params.recieveAddress], function(err, res){
+    if(err){
+      console.log('[FIND ERROR] - ',err.message);
+      callback(0);
+      return false;
+    }
+    console.log("查找成功");
+    callback(1, res);
+  })
+}
+
 // 参数列表{"sendAddress": "", "recieveAddress": "", "transactTime":"", "limit": 1, "page": 2}
 function findByConditionsCount(params, callback){
   var sql_select_count = 'select count(*) as allCount from transactionrecord where 1 = 1 '  // 注意末尾空格
@@ -109,6 +140,20 @@ function findByConditions(params, callback){
 
 }
 
+// 获取用户的一条交易记录
+function findOneRecord(params, callback){
+  var sql_select = 'select * from transactionrecord where id = ?'
+  conn.query(sql_select, params, function(err, result){
+    if(err){
+      console.log('[SELECT ALL RECORD ERROR] - ',err.message);
+      callback(0)
+      return;
+    }
+    console.log("查找交易记录成功")
+    callback(1, result);
+  })
+}
+
 // 查找备注为购买服务的交易记录
 function findBytransactRemarks(params, callback){
   var sql_select = "select * from transactionrecord where sendAddress = ? and transactRemarks = '购买服务' "
@@ -143,6 +188,9 @@ module.exports = {
   findByPrimaryKey,
   findByConditionsCount,
   findByConditions,
+  findOneRecord,
   findBytransactRemarks,
-  findByEthAddress
+  findByEthAddress,
+  findBysendAddressOrrecieveAddress
 }
+

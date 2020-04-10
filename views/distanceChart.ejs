@@ -1,46 +1,86 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-    <title></title>
-    <script type="text/javascript" src="/javascripts/echarts.min.js"></script>
-	</head>
-	<body>
 
-    <div id="distanceChart" style="width: 100%;height:500px;"></div>
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <script type="text/javascript" src="/javascripts/echarts.min.js"></script>
+</head>
 
-    <script>
+<body>
 
-        var result = JSON.parse('<%- JSON.stringify(healthDataList) %>')
+  <div id="distanceChart" style="width: 100%;height:400px;"></div>
 
-        var time = [];
-        var distance = [];
+  <script>
 
-        var data_count = result.length;
+    var result = JSON.parse('<%- JSON.stringify(healthDataList) %>')
 
-        for(var i=data_count-1; i>=data_count-7; i--){
-          time.push(result[i].uploadTime);
-          distance.push(result[i].distance);
-        }
+    var time = [];
+    var distance = [];
 
-        var myChart = echarts.init(document.getElementById('distanceChart'));
+    var date = new Date()
+    var nowTime = format(new Date(), '-')                       // 获取当前的时间
+    date.setTime(date.getTime() - 7 * 24 * 60 * 60 * 1000)      // 减去一周的时间
+    var lastWeekTime = format(date, '-')                        // 获取一周之前的时间
 
-        option = {
-            xAxis: {
-                type: '日期',
-                data: time
-            },
-            yAxis: {
-                type: '步数'
-            },
-            series: [{
-                data: distance,
-                type: 'line'
-            }]
-        };
+    var myHealthDataList = result.filter(function (value) {               // 过滤出这一周的数据
+      return (value.uploadTime <= nowTime) && (value.uploadTime >= lastWeekTime)
+    })
 
-        myChart.setOption(option);
+    myHealthDataList.filter(function (value) {
+      time.push(value.uploadTime)
+      distance.push(parseInt(value.distance))
+    })
 
-    </script>
-	</body>
+    var myChart = echarts.init(document.getElementById('distanceChart'));
+
+    option = {
+      title: {
+        text: '最近一周运动步数',
+        left: 'center'
+      },
+      xAxis: {
+        type: 'category',
+        data: time
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [{
+        data: distance,
+        type: 'line'
+      }]
+    };
+
+    myChart.setOption(option);
+
+    // 时间格式化
+    function format(Date, str) {
+      var obj = {
+        Y: Date.getFullYear(),
+        M: Date.getMonth() + 1,
+        D: Date.getDate(),
+        H: Date.getHours(),
+        Mi: Date.getMinutes(),
+        S: Date.getSeconds()
+      }
+      // 拼接时间 hh:mm:ss
+      var time = ' ' + supplement(obj.H) + ':' + supplement(obj.Mi) + ':' + supplement(obj.S);
+      // yyyy-mm-dd
+      if (str.indexOf('-') > -1) {
+        return obj.Y + '-' + supplement(obj.M) + '-' + supplement(obj.D) + time;
+      }
+      // yyyy/mm/dd
+      if (str.indexOf('/') > -1) {
+        return obj.Y + '/' + supplement(obj.M) + '/' + supplement(obj.D) + time;
+      }
+    }
+    // 位数不足两位补全0
+    function supplement(nn) {
+      return nn = nn < 10 ? '0' + nn : nn;
+    }
+
+  </script>
+</body>
+
 </html>

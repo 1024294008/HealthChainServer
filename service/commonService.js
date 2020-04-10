@@ -62,7 +62,7 @@ function uploadOrgHealthData(req, callback){
   if(req.body && req.body.verify && req.body.verify.id && req.body.heartRate && req.body.heat && req.body.sleepQuality && req.body.distance && req.body.evaluation && req.body.permitVisit){
     // 查找机构用户的私钥和合约地址
     dao.orgDao.findByPrimaryKey(req.body.id, function(status1, result1){
-      if( 1 === status && result[0]){
+      if( 1 === status1 && result1[0]){
         var healthData = {
           "heartRate": req.body.heartRate,
           "heat": req.body.heat,
@@ -72,10 +72,10 @@ function uploadOrgHealthData(req, callback){
           "uploadTime": dateUtil.format(new Date(), '-'),
           "permitVisit": parseInt(req.body.permitVisit)
         }
-        var privateKey = result[0].privateKey
-        var contractAddr = result[0].contractAddr
+        var privateKey = result1[0].privateKey
+        var contractAddr = result1[0].contractAddr
         dao.ethDao.addData(healthData, privateKey, contractAddr, function(status2, result2){
-          if(1 === status){
+          if(1 === status2){
             obj._code = '200'
             obj._msg = '上传成功'
             obj._data = {}
@@ -104,10 +104,11 @@ function uploadOrgHealthData(req, callback){
 
 // 用户上传健康数据
 function uploadUserHealthData(req, callback){
-  if(req.body && req.body.verify && req.body.verify.id && req.body.heartRate && req.body.heat && req.body.sleepQuality && req.body.distance && req.body.evaluation && req.body.permitVisit && req.body.uploadTime){
+  if(req.body && req.body.verify && req.body.verify.id && req.body.heartRate && req.body.heat && req.body.sleepQuality && req.body.distance && req.body.evaluation && req.body.permitVisit){
     // 查找用户的私钥和合约地址
     dao.userDao.findByPrimaryKey(req.body.verify.id, function(status1, result1){
       // console.log(result1[0])
+      console.log(status1)
       if( 1 === status1 && result1[0]){
         var healthData = {
           "heartRate": req.body.heartRate,
@@ -115,7 +116,7 @@ function uploadUserHealthData(req, callback){
           "sleepQuality": req.body.sleepQuality,
           "distance": req.body.distance,
           "evaluation": req.body.evaluation,
-          "uploadTime": req.body.uploadTime,
+          "uploadTime": dateUtil.format(new Date(), '-'),
           "permitVisit": parseInt(req.body.permitVisit)
         }
         var privateKey = result1[0].privateKey

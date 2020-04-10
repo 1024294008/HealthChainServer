@@ -4,9 +4,9 @@ var router = express.Router()
 var service = require('../../service')
 var checkToken = require('../../middleware/checkToken')
 
-router.post('/', checkToken, function(req, res, next){
-  service.userService.getHealthDataList(req, function(result){
-    res.render('distanceChart', {healthDataList: result._data});
+router.post('/', checkToken,function(req, res, next){
+  service.orgService.getTransferHistory(req, function(result){
+    res.json(result)
   })
 })
 

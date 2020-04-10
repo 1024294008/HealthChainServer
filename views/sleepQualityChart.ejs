@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="/javascripts/echarts.min.js"></script>
+  </head>
+  <body>
+    <div id="main" style="width: 100%;height:400px;"></div>
+  </body>
+</html>
+<script type="text/javascript">
+  var myChart = echarts.init(document.getElementById('main'));
+
+  var result = JSON.parse('<%- JSON.stringify(healthDataList) %>')
+
+  var uploadTime = [];
+  var sleepQuality = [];
+
+  for (var i = 0; i < 14; i++) {
+    uploadTime.push(result[i].uploadTime.substring(5,10)+"日");
+    sleepQuality.push(result[i].sleepQuality.split("小时")[0]);
+  }
+
+  option = {
+    title: {
+        text: '最近14天睡眠时长',
+        subtext: '正常成人区间：6-8'
+    },
+    legend: {
+        data: ['bar']
+    },
+    toolbox: {
+        // y: 'bottom',
+        feature: {
+            magicType: {
+                type: ['stack', 'tiled']
+            },
+            dataView: {},
+            saveAsImage: {
+                pixelRatio: 2
+            }
+        }
+    },
+    tooltip: {},
+    xAxis: {
+        data: uploadTime,
+        splitLine: {
+            show: false
+        }
+    },
+    yAxis: {
+    },
+    series: [{
+        name: '睡眠时长',
+        type: 'bar',
+        data: sleepQuality,
+        animationDelay: function (idx) {
+            return idx * 10;
+        }
+    }],
+    animationEasing: 'elasticOut',
+    animationDelayUpdate: function (idx) {
+        return idx * 5;
+    }
+};
+myChart.setOption(option);
+</script>

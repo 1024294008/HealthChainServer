@@ -1,5 +1,6 @@
 var dao = require('../dao')
 var createToken = require('../middleware/createToken')
+var HealthDataList = require('../models/HealthDataList')
 var BigNumber = require("bignumber.js")
 var dateUtil = require('../utils/dateUtil')
 var obj = {
@@ -104,7 +105,7 @@ function updateOrgInfo(req, callback){
         }
       }else{
         json_updateOrgInfo = {
-          portrait:req.body.portrait,
+          pic:req.body.portrait,
           organizationName:req.body.organizationName,
           introduction:req.body.introduction,
           account:req.body.account
@@ -229,7 +230,6 @@ function updateMedicalService(req,callback){
 }
 // 删除医疗服务
 function delMedicalService(req,callback){
-  console.body("删除医疗服务");
   if(req.body && req.body.verify && req.body.verify.id && req.body.id){
     dao.medicalServiceDao.deleteByPrimaryKey(req.body.id,function(status,result){
       if (1 == status) {
@@ -450,7 +450,6 @@ function getBalance(req,callback){
 function getAllUsers(req,callback){
   if(req.body.verify && req.body.verify.id){
     var json_getAllUsers = {
-      "id":req.body.verify.id,
       "page":req.body.page,
       "limit":req.body.limit
     }
@@ -458,10 +457,54 @@ function getAllUsers(req,callback){
       if (1===status1) {
         //说明获取到了总数,继续获取分页数据
         var allCount = result1[0].allCount;
-
+        console.log("查到的总数："+allCount)
         dao.userDao.findByConditions(json_getAllUsers,function(status2,result2){
           if (1===status2) {
             //说明获取成功
+            // for(let i=0;i<result2.length;i++){
+            //   dao.ethDao.getPublicHealthCount(result2[i].contractAddr,function(_sta,_res){
+            //     console.log(_res)
+            //     result2[i].sum = _res
+            //   })
+            //   dao.ethDao.getAuthInfo(ethAddress,result2[i].contractAddr,function(_sta,_res){
+            //     if (_res>0) {
+            //       result2[i].paid = "1"
+            //     } else {
+            //       result2[i].paid = "0"
+            //     }
+            //   })
+            // }
+            // for(var i = 0; i < result2.length; i ++){
+            //   (function(i){
+            //     dao.ethDao.getPublicHealthCount(result2[0].contractAddr,function(_sta,_res){
+            //           console.log(_res)
+            //           result2[0].sum = _res
+            //         })
+            //         dao.ethDao.getAuthInfo(ethAddress,result2[0].contractAddr,function(_sta,_res){
+            //           if (_res>0) {
+            //             result2[0].paid = "1"
+            //           } else {
+            //             result2[0].paid = "0"
+            //           }
+            //         })
+
+            //   })(i)
+            // }
+            // result2.forEach(item =>{
+            //   //作用域居然这么窄
+            //   dao.ethDao.getPublicHealthCount(item.contractAddr,function(_sta,_res){
+            //     console.log(_res)
+            //     item.sum = _res
+            //   })
+            //   dao.ethDao.getAuthInfo(ethAddress,item.contractAddr,function(_sta,_res){
+            //     if (_res>0) {
+            //       item.paid = "1"
+            //     } else {
+            //       item.paid = "0"
+            //     }
+            //   })
+            // })
+            // console.log(JSON.stringify(result2))
             var jsonResult = {
               code:0,
               msg:'',
@@ -487,6 +530,235 @@ function getAllUsers(req,callback){
 
   }
 }
+//15 得到用户授权
+//参数：token,目标用户contractAddr，目标用户id,目标用户ethAddress
+function getUserAuth(req, callback){
+if(req.body.verify && req.body.verify.id && req.body && req.body.id && req.body.contractAddr && req.body.ethAddress){
+  dao.orgDao.findByPrimaryKey(req.body.verify.id, function(status, result){
+    dao.ethDao.authToOrg(result[0].organizationName,result[0].privateKey,req.body.contractAddr,200000000000000000,function(_status,_result){
+      console.log("授权状态："+_status)
+      if( 1 === _status){
+        var json_trans = {
+          sendAddress:result[0].ethAddress,
+          recieveAddress:req.body.ethAddress,
+          transactEth:200000000000000000,
+          transactTime:Date.now(),
+          transactRemarks:"机构获取授权"
+        }
+        dao.transactionrecordDao.insert(json_trans,function(status_,result_){
+          if( 1 === status_)
+          {
+            var json_visit = {
+              userId:req.body.id,
+              visitorId:req.body.verify.id,
+              visitTime:dateUtil.format(new Date(), '-')
+            }
+            dao.visitorrecordDao.insert(json_visit,function(sta,res){
+              if( 1 === sta){
+                obj._code = "200";
+                obj._msg = "授权成功！";
+                obj._data= res;
+                callback(obj);
+              }else{
+                obj._code = "201";
+                obj._msg = "授权失败";
+                obj._data= {};
+                callback(obj);
+              }
+            })
+          }
+          else{
+            obj._code = "201";
+            obj._msg = "插入交易记录失败";
+            obj._data = {};
+            callback(obj);
+          }
+        })
+      }
+      else{
+        obj._code = "201";
+        obj._msg = "获取授权失败，请检查账户余额是否充足！";
+        obj._data = {};
+        callback(obj);
+      }
+    })
+  })
+}
+}
+//16已经获取授权的用户直接查看用户的数据
+//参数：机构的ethAddress
+function getAllHealthData(req,callback){
+if(req.body.verify && req.body.verify.id && req.body && req.body.ethAddress){
+  //通过交易记录表查当前机构的付款记录,t通过交易记录拿到已经付款的用户的列表
+  dao.transactionrecordDao.findBysendAddress(req.body.ethAddress,function(status,result){
+    for(var i = 0; i < result.length; i++){
+      //扫描用户列表，逐个获得用户信息
+      dao.userDao.findByEthAddress(result[i].recieveAddress,function(status1,result1){
+        //拿到了用户信息，取出该用户的全部公开数据
+        //验证一下用户对该机构的授权情况
+        dao.ethDao.getAuthInfo([ethAddress,result2[i].contractAddr],function(_sta,_res){
+          if (_res>0) {
+            //剩余时间>0，说明已经获得授权且在授权时间内
+            dao.ethDao.getHealthCount(result1[i].contractAddr, function(status, count){
+              if(1 === status && 0 !== count){
+                var healthDataList = new HealthDataList(count)
+                healthDataList.on('dataAccepted', function(list){   // 当监听接收的数据量达到count时(或者超时)触发此事件
+                  obj._code = '200'
+                  obj._msg = '查询成功'
+                  obj._data = list
+                  callback(obj)
+                })
+                for(var i = 0; i < count; i ++){
+                  (function(i){                   // 闭包
+                    dao.ethDao.getHDataByIndex(i, req.body.ethAddress, result1[i].contractAddr, function(status, result){
+                      if(1 === status){
+                        // 去掉冗余的字段
+                        delete result[0]
+                        delete result[1]
+                        delete result[2]
+                        delete result[3]
+                        delete result[4]
+                        delete result[5]
+                        delete result[6]
+                        result['index'] = i
+                        healthDataList.addHealthData(result)
+                      } else {
+                        healthDataList.addHealthData({
+                          "heartRate": "",
+                          "heat": "",
+                          "sleepQuality": "",
+                          "distance": "",
+                          "evaluation": "",
+                          "uploadTime": "",
+                          "permitVisit": 0,
+                          "index": -1
+                        })
+                      }
+                    })
+                  })(i)
+                }
+              } else if(1 === status && 0 === count){
+                obj._code = '202'
+                obj._msg = '无数据'
+                obj._data = {}
+                callback(obj)
+              } else {
+                obj._code = '201'
+                obj._msg = '查询失败'
+                obj._data = {}
+                callback(obj)
+              }
+            })
+          }
+        })
+
+      })
+    }
+  })
+}}
+//17获取用户的健康数据数量
+function getUserHealthDataCount(req,callback){
+if(req.body.verify && req.body.verify.id && req.body && req.body.contractAddr){
+  dao.ethDao.getPublicHealthCount(req.body.contractAddr,function(status,result){
+    if( 1 === status){
+      console.log("查找到:"+result)
+      obj._code = "200";
+      obj._msg = "获取总数成功";
+      obj._data = result;
+      callback(obj);
+    }else{
+      obj._code = "201";
+      obj._msg = "获取总数失败..";
+      obj._data = {};
+      callback(obj);
+    }
+  })
+}
+}
+//18获取用户对当前机构的授权与否
+//参数：目标用户的合约地址
+function authFromUser(req,callback){
+if(req.body.verify && req.body.verify.id && req.body && req.body.contractAddr){
+  dao.orgDao.findByPrimaryKey(req.body.verify.id, function(status, result){
+    dao.ethDao.getAuthInfo(result[0].ethAddress, req.body.contractAddr,function(_sta,_res){
+      console.log("这是机构拿到授权的凭证："+_res)
+      if (_sta===1) {
+        //成功获取授权状态，判断授权时间
+        if (_res>0) {
+          obj._code = "200";
+          obj._msg = "授权中";
+          obj._data = "1";
+          callback(obj);
+        }else{
+          obj._code = "200";
+          obj._msg = "未授权";
+          obj._data = "0";
+          callback(obj);
+        }
+      } else {
+        obj._code = "201";
+        obj._msg = "获取授权状态失败";
+        obj._data = "0";
+        callback(obj);
+      }
+    })
+  })
+
+}
+}
+//19得到机构的转账记录
+function getTransferHistory(req,callback){
+  if(req.body && req.body.verify && req.body.verify.id){
+    dao.orgDao.findByPrimaryKey(req.body.verify.id, function(status, result){
+      var params = {
+        sendAddress: result[0].ethAddress,
+        recieveAddress: result[0].ethAddress,
+        limit: req.body.limit,
+        page: req.body.page
+      }
+      dao.transactionrecordDao.findByConditionsCount(params, function(status, result){
+        if( 1=== status && result[0]){
+          var res_json = {
+            code: 0,
+            msg: '',
+            count: 0,
+            data: []
+          }
+          res_json.count = result[0].allCount;
+          dao.transactionrecordDao.findBysendAddressOrrecieveAddress(params, function(st, re){
+            if( 1=== st && re[0]){
+              // objList._data.dataList.data = re;
+              // callback(objList);
+
+              res_json.data = re;
+
+              callback(res_json);
+            }
+            else {
+              obj._code = "201";
+              obj._msg = "查找失败";
+              obj._data = {};
+              callback(obj);
+            }
+          });
+
+        }
+        else {
+          obj._code = "201";
+          obj._msg = "查找失败";
+          obj._data = {};
+          callback(obj);
+        }
+      });
+    });
+  }
+  else{
+    obj._code = "201";
+    obj._msg = "查找失败..";
+    obj._data = {};
+    callback(obj);
+  }
+}
 module.exports = {
   login,
   register,
@@ -501,5 +773,10 @@ module.exports = {
   updatePassword,
   transfer,
   getBalance,
-  getAllUsers
+  getAllUsers,
+  getUserAuth,
+  getAllHealthData,
+  getUserHealthDataCount,
+  authFromUser,
+  getTransferHistory
 }

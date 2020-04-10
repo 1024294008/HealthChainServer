@@ -14,14 +14,17 @@ module.exports = function(app){
   app.use('/api/user/getHealthCount', require('./users/getHealthCount'))
   app.use('/api/user/getHealthDataList', require('./users/getHealthDataList'))
   app.use('/api/user/transferUserToUser', require('./users/transferUserToUser'))
+  app.use('/api/user/getUserTransactionRecord', require('./users/getUserTransactionRecord'))
+  app.use('/api/user/getOneTransactionRecord', require('./users/getOneTransactionRecord'))
   app.use('/api/user/findRecordAndOrnInfoByUserId', require('./users/findRecordAndOrnInfoByUserId'))
   app.use('/api/user/findBytransactRemarks', require('./users/findBytransactRemarks'))
   app.use('/api/user/findRecordByEthAddress', require('./users/findRecordByEthAddress'))
   app.use('/api/user/UserTransactionRecordDetail', require('./users/UserTransactionRecordDetail'))
   app.use('/api/user/distanceChart', require('./users/distanceChart'))
   app.use('/api/user/uploadTimeChart', require('./users/uploadTimeChart'))
-
+  app.use('/api/user/heatChart', require('./users/heatChart'))
   app.use('/api/user/permitVisitChart', require('./users/permitVisitChart'))
+  app.use('/api/user/sleepQualityChart', require('./users/sleepQualityChart'))
   app.use('/api/user/heartRateChart', require('./users/heartRateChart'))
 
 
@@ -42,7 +45,10 @@ module.exports = function(app){
   app.use('/api/org/transfer', require('./org/transfer'))
   app.use('/api/org/getBalance', require('./org/getBalance'))
   app.use('/api/org/getAllUsers', require('./org/getAllUsers'))
-
+  app.use('/api/org/getUserAuth', require('./org/getUserAuth'))
+  app.use('/api/org/getUserHealthDataCount', require('./org/getUserHealthDataCount'))
+  app.use('/api/org/authFromUser', require('./org/authFromUser'))
+  app.use('/api/org/getTransferHistory', require('./org/getTransferHistory'))
 
 
 
