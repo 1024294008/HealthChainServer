@@ -969,7 +969,7 @@ function transferToUser(req, callback){
     var receiverEthAddr = req.body.receiverEthAddr;
     var value = new BigNumber(req.body.value);
     dao.ethDao.transferToUser(receiverEthAddr, value, function(status){
-      if( 1 === sta){
+      if( 1 === status){
         var record = {
           sendAddress: req.body.sendAddress,  // 发送方地址
           recieveAddress: receiverEthAddr,  // 接收方地址
